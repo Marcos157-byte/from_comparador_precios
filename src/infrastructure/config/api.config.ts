@@ -8,5 +8,9 @@ export const apiConfig = {
     '/auth/register',
     '/auth/token/refresh',
     '/auth/password-reset',
+    '/kache/categorias',
+    '/kache/productos',
+    '/kache/precios',
+    '/kache/comercios',
   ],
 } as const;

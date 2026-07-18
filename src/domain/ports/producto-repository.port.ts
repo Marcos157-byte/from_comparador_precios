@@ -5,6 +5,7 @@ export interface ListarProductosParams {
   tipo?: string;
   buscar?: string;
   categoria?: number;
+  page?: number;
 }
 
 export interface ProductoRepository {

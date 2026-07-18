@@ -14,4 +14,6 @@ export interface Producto {
   idCategoria: number | null;
   imagenUrl: string | null;
   categoriaDetalle: CategoriaDetalle | null;
+  precioDesde: number | null;
+  tieneOferta: boolean;
 }
