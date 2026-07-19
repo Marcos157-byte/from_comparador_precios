@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import { useAuthStore } from '@/presentation/store/auth.store';
 import { AuthStatus } from '@/domain/enums/auth-status.enum';
@@ -8,6 +7,7 @@ import { validatePassword, validateUsername } from '@/presentation/utils/validat
 import { Input } from '@/presentation/components/ui/input';
 import { Label } from '@/presentation/components/ui/label';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
+import { GoogleLoginButton } from '@/presentation/components/google-login-button';
 
 const NAVY = '#1A237E';
 
@@ -15,7 +15,6 @@ export function LoginPage() {
   const status = useAuthStore((s) => s.status);
   const errorMessage = useAuthStore((s) => s.errorMessage);
   const login = useAuthStore((s) => s.login);
-  const loginConGoogle = useAuthStore((s) => s.loginConGoogle);
   const isLoading = status === AuthStatus.Checking;
 
   const [username, setUsername] = useState('');
@@ -106,18 +105,8 @@ export function LoginPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="mt-4 flex justify-center">
-          <GoogleLogin
-            onSuccess={(credentialResponse) => {
-              setGoogleError(null);
-              if (credentialResponse.credential) {
-                loginConGoogle(credentialResponse.credential);
-              } else {
-                setGoogleError('No se pudo iniciar sesión con Google.');
-              }
-            }}
-            onError={() => setGoogleError('No se pudo iniciar sesión con Google.')}
-          />
+        <div className="mt-4">
+          <GoogleLoginButton onError={setGoogleError} />
         </div>
 
         <Link
