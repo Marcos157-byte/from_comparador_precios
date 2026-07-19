@@ -5,7 +5,7 @@ import { env } from '@/infrastructure/config/env';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={env.googleClientId}>
+    <GoogleOAuthProvider clientId={env.googleClientId} locale="es">
       <BrowserRouter>
         <AppRouter />
       </BrowserRouter>
