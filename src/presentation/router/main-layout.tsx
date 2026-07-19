@@ -11,7 +11,7 @@ const tabs = [
 
 export function MainLayout() {
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    <div className="flex min-h-full flex-col bg-background">
       <div className="flex-1 pb-16">
         <Outlet />
       </div>

@@ -29,16 +29,28 @@ export function AppRouter() {
     // contenedor, se convierte en el "containing block" de todo elemento `fixed`
     // descendiente (bottom nav, CTAs fijos, toasts), así quedan atrapados dentro de
     // esta columna en vez de estirarse al viewport completo — sin tocar cada pantalla.
-    // Clave: la columna debe medir EXACTO un viewport (`h-svh`, no `min-h-svh`) y
-    // scrollear su propio contenido (`overflow-y-auto`). Si se le permitiera crecer con
-    // el contenido, en páginas largas (ej. Catalog con muchos productos) la columna
-    // completa se estira, y todo lo `fixed` (que se ancla a ESTA columna, no al
-    // viewport real) terminaría pegado al fondo de ese contenido larguísimo en vez de
-    // quedar visible pegado al fondo de la pantalla.
-    <div className="min-h-svh w-full bg-neutral-200">
-      <div className="relative mx-auto h-svh w-full max-w-[480px] transform-gpu overflow-y-auto bg-background shadow-xl">
+    // Clave: la columna debe medir EXACTO un viewport y scrollear su propio contenido
+    // (`overflow-y-auto`). Si se le permitiera crecer con el contenido, en páginas
+    // largas (ej. Catalog con muchos productos) la columna completa se estira, y todo
+    // lo `fixed` (que se ancla a ESTA columna, no al viewport real) terminaría pegado
+    // al fondo de ese contenido larguísimo en vez de quedar visible pegado al fondo de
+    // la pantalla.
+    //
+    // `h-viewport-dinamico`/`min-h-viewport-dinamico` (definidas en index.css) en vez de
+    // `h-svh`/`min-h-svh`: `svh` asume que la barra de direcciones del navegador móvil
+    // está siempre expandida (mide el viewport más chico posible) y NO se recalcula
+    // cuando esa barra se oculta al hacer scroll — el navegador real termina siendo más
+    // alto que nuestro contenedor `svh`, dejando un hueco abajo donde el nav fijo (que
+    // se ancla a ESTE contenedor) queda flotando antes del borde real de la pantalla.
+    // `dvh` sí se recalcula en vivo con ese cambio; las utilidades declaran
+    // `100vh; 100svh; 100dvh` en ese orden como fallback en cascada, así que en
+    // cualquier navegador (viejo o nuevo) siempre gana la unidad más precisa que
+    // entienda. Todo lo demás anidado dentro de este shell usa `h-full`/`min-h-full`
+    // para heredar esta medida en vez de volver a preguntarle al viewport.
+    <div className="min-h-viewport-dinamico w-full bg-neutral-200">
+      <div className="relative mx-auto h-viewport-dinamico w-full max-w-[480px] transform-gpu overflow-y-auto bg-background shadow-xl">
         {status === AuthStatus.Checking ? (
-          <div className="flex min-h-svh items-center justify-center bg-background">
+          <div className="flex min-h-full items-center justify-center bg-background">
             <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : status === AuthStatus.Unauthenticated ? (

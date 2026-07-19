@@ -49,7 +49,7 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    <div className="flex min-h-full flex-col bg-background">
       <div className="flex h-14 items-center gap-2 border-b border-border bg-card px-2">
         <button
           type="button"

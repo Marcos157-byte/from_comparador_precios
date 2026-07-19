@@ -118,3 +118,42 @@
     @apply font-sans;
     }
 }
+
+@layer utilities {
+  /* `100vh` como base, subiendo de precisión vía @supports (no vía cascada de
+     declaraciones repetidas: el minificador de producción -Lightning CSS- colapsa
+     "height: 100vh; height: 100svh; height: 100dvh;" a solo la última, perdiendo el
+     fallback real para navegadores viejos). @supports sí sobrevive la minificación
+     porque cada regla queda condicionada a que el navegador la entienda en tiempo de
+     ejecución, no es algo que el build pueda "resolver" de antemano.
+     Solo el shell raíz de app-router.tsx debería usar esto: es el único punto que
+     necesita "cuánto mide el viewport de verdad ahora mismo", incluyendo cuando la
+     barra de direcciones del navegador móvil se oculta/aparece. Todo lo demás anidado
+     adentro debe usar h-full/min-h-full para heredar esa medida, no volver a
+     preguntarle al viewport (eso es justamente lo que causaba el bug del nav
+     "flotando"). */
+  .h-viewport-dinamico {
+    height: 100vh;
+  }
+  .min-h-viewport-dinamico {
+    min-height: 100vh;
+  }
+
+  @supports (height: 100svh) {
+    .h-viewport-dinamico {
+      height: 100svh;
+    }
+    .min-h-viewport-dinamico {
+      min-height: 100svh;
+    }
+  }
+
+  @supports (height: 100dvh) {
+    .h-viewport-dinamico {
+      height: 100dvh;
+    }
+    .min-h-viewport-dinamico {
+      min-height: 100dvh;
+    }
+  }
+}

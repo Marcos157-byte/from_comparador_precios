@@ -35,7 +35,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
+    <div className="flex min-h-full items-center justify-center bg-background p-6">
       <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col">
         <TiraRombosCentrada className="mx-auto h-[30px] w-[200px]" />
 
