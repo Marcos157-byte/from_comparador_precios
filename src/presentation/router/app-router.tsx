@@ -39,40 +39,49 @@ export function AppRouter() {
     // `h-viewport-dinamico`/`min-h-viewport-dinamico` (definidas en index.css) en vez de
     // `h-svh`/`min-h-svh`: `svh` asume que la barra de direcciones del navegador móvil
     // está siempre expandida (mide el viewport más chico posible) y NO se recalcula
-    // cuando esa barra se oculta al hacer scroll — el navegador real termina siendo más
-    // alto que nuestro contenedor `svh`, dejando un hueco abajo donde el nav fijo (que
-    // se ancla a ESTE contenedor) queda flotando antes del borde real de la pantalla.
-    // `dvh` sí se recalcula en vivo con ese cambio; las utilidades declaran
-    // `100vh; 100svh; 100dvh` en ese orden como fallback en cascada, así que en
-    // cualquier navegador (viejo o nuevo) siempre gana la unidad más precisa que
-    // entienda. Todo lo demás anidado dentro de este shell usa `h-full`/`min-h-full`
-    // para heredar esta medida en vez de volver a preguntarle al viewport.
+    // cuando esa barra se oculta al hacer scroll. `dvh` sí se recalcula en vivo; las
+    // utilidades declaran fallback en cascada vía @supports para navegadores viejos.
+    //
+    // IMPORTANTE — por qué el scroll vive en un div ANIDADO y no en este mismo shell:
+    // un elemento `position: fixed` cuyo "containing block" lo establece un ancestro
+    // con `transform` (nuestro caso) deja de comportarse como fijo-al-viewport de
+    // verdad si ESE MISMO ancestro también es el que scrollea (`overflow-y-auto`) — en
+    // ese caso el navegador lo trata como si fuera `position: absolute` DENTRO del
+    // contenido scrolleado, y se mueve junto con el scroll en vez de quedarse pegado
+    // (confirmado con getBoundingClientRect(): el nav se corría exactamente lo mismo
+    // que el scrollTop del contenedor). La solución es separar responsabilidades: este
+    // div (transform-gpu) NUNCA scrollea, solo establece el containing block fijo de
+    // tamaño estable; el scroll real ocurre en el div hijo de abajo. Así, el nav (o
+    // cualquier `fixed` de cualquier página) "salta" el div que scrollea sin verse
+    // afectado por su posición de scroll, y se ancla de verdad al shell estable.
     <div className="min-h-viewport-dinamico w-full bg-neutral-200">
-      <div className="relative mx-auto h-viewport-dinamico w-full max-w-[480px] transform-gpu overflow-y-auto bg-background shadow-xl">
-        {status === AuthStatus.Checking ? (
-          <div className="flex min-h-full items-center justify-center bg-background">
-            <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        ) : status === AuthStatus.Unauthenticated ? (
-          <Routes>
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="*" element={<LoginPage />} />
-          </Routes>
-        ) : (
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="explorar" element={<ExplorarPage />} />
-              <Route path="mi-lista" element={<MiListaPage />} />
-              <Route path="perfil" element={<ProfilePage />} />
-              <Route path="subcategoria/:idPadre" element={<SubcategoriaPage />} />
-              <Route path="catalog/:tipo/:idCategoria" element={<CatalogPage />} />
-              <Route path="precios/:idProducto" element={<PreciosPage />} />
-              <Route path="comparar-listas" element={<CompararListasPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        )}
+      <div className="relative mx-auto h-viewport-dinamico w-full max-w-[480px] transform-gpu bg-background shadow-xl">
+        <div className="size-full overflow-y-auto">
+          {status === AuthStatus.Checking ? (
+            <div className="flex min-h-full items-center justify-center bg-background">
+              <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          ) : status === AuthStatus.Unauthenticated ? (
+            <Routes>
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="*" element={<LoginPage />} />
+            </Routes>
+          ) : (
+            <Routes>
+              <Route element={<MainLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path="explorar" element={<ExplorarPage />} />
+                <Route path="mi-lista" element={<MiListaPage />} />
+                <Route path="perfil" element={<ProfilePage />} />
+                <Route path="subcategoria/:idPadre" element={<SubcategoriaPage />} />
+                <Route path="catalog/:tipo/:idCategoria" element={<CatalogPage />} />
+                <Route path="precios/:idProducto" element={<PreciosPage />} />
+                <Route path="comparar-listas" element={<CompararListasPage />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          )}
+        </div>
       </div>
     </div>
   );

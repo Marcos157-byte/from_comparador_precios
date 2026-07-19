@@ -111,6 +111,14 @@
   * {
     @apply border-border outline-ring/50;
     }
+  /* El documento (html/body) NO debe scrollear nunca: todo el scroll real de la app
+     pasa dentro del shell de app-router.tsx (el que tiene overflow-y-auto). Sin esto,
+     existía scroll doble — el de la ventana Y el del shell — y como el bottom nav es
+     `fixed` anclado al shell (containing block vía transform-gpu), scrollear la
+     ventana exterior con el mouse/gestos movía el nav en vez de dejarlo pegado abajo. */
+  html, body {
+    @apply h-full overflow-hidden;
+    }
   body {
     @apply bg-background text-foreground;
     }
