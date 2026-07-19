@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRightLeft, Search, ShoppingBag, X } from 'lucide-react';
+import { ArrowRightLeft, Search, ShoppingBag, Store, X } from 'lucide-react';
 import type { Producto } from '@/domain/entities/producto.entity';
 import { TipoComercio } from '@/domain/enums/tipo-comercio.enum';
 import { buscarProductos } from '@/domain/services/buscar-productos.service';
@@ -38,6 +38,15 @@ export function ExplorarPage() {
             PreciosEC
           </p>
           <p className="mt-2 text-xl font-bold text-[#333333]">Explorar</p>
+
+          <button
+            type="button"
+            onClick={() => navigate('/explorar-comercio')}
+            className="mt-3 flex items-center gap-1.5 self-start rounded-full bg-primary/12 px-3 py-1.5 text-xs font-bold text-primary"
+          >
+            <Store className="size-3.5" />
+            Explorar por comercio
+          </button>
 
           <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
             <Search className="size-[18px] shrink-0 text-primary" />

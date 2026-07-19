@@ -6,6 +6,7 @@ import { LoginPage } from '@/presentation/pages/auth/login-page';
 import { RegisterPage } from '@/presentation/pages/auth/register-page';
 import { HomePage } from '@/presentation/pages/catalog/home-page';
 import { ExplorarPage } from '@/presentation/pages/catalog/explorar-page';
+import { ExplorarComercioPage } from '@/presentation/pages/catalog/explorar-comercio-page';
 import { MiListaPage } from '@/presentation/pages/cart/mi-lista-page';
 import { CompararListasPage } from '@/presentation/pages/cart/comparar-listas-page';
 import { ProfilePage } from '@/presentation/pages/profile/profile-page';
@@ -71,6 +72,8 @@ export function AppRouter() {
               <Route element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="explorar" element={<ExplorarPage />} />
+                <Route path="explorar-comercio" element={<ExplorarComercioPage />} />
+                <Route path="explorar-comercio/:idComercio" element={<ExplorarComercioPage />} />
                 <Route path="mi-lista" element={<MiListaPage />} />
                 <Route path="perfil" element={<ProfilePage />} />
                 <Route path="subcategoria/:idPadre" element={<SubcategoriaPage />} />

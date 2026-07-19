@@ -1,5 +1,6 @@
 import type { PrecioRepository } from '@/domain/ports/precio-repository.port';
 import type { Precio } from '@/domain/entities/precio.entity';
+import type { Paginated } from '@/domain/entities/paginated.entity';
 import type { ComercioLigero } from '@/domain/entities/comercio-ligero.entity';
 import { axiosClient } from '../http/axios-client';
 import { mapProducto, type ProductoRaw } from './producto-http.adapter';
@@ -60,5 +61,16 @@ export class PrecioHttpAdapter implements PrecioRepository {
       params: { id_producto: idProducto },
     });
     return data.results.map(mapPrecio);
+  }
+
+  async listarPorComercio(idComercio: number, page?: number): Promise<Paginated<Precio>> {
+    const { data } = await axiosClient.get<PaginatedRaw<PrecioRaw>>('/kache/precios/', {
+      params: { comercio: idComercio, page },
+    });
+    return {
+      count: data.count,
+      next: data.next,
+      results: data.results.map(mapPrecio),
+    };
   }
 }
