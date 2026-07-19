@@ -6,12 +6,12 @@ import { useAuthStore } from '@/presentation/store/auth.store';
 // lograr un look 100% custom, pero resultó frágil en navegador real (el click no
 // llegaba de forma confiable al iframe real). Volvemos al botón real y visible de
 // Google, y nos apoyamos en sus props soportadas para acercarnos a un look genérico:
-// - `text="continue_with"` pide la etiqueta genérica "Continuar con Google" (Google
-//   igual puede reemplazarla por "Continuar como {nombre}" si detecta una sesión ya
-//   consentida en este origen — eso ya no depende de nuestro código).
-// - `use_fedcm_for_button` le pide a Google usar el selector de cuentas nativo del
-//   navegador (Federated Credential Management) en el click, en vez de decidir todo
-//   de antemano dentro del botón.
+// - `text="continue_with"` pide la etiqueta genérica "Continuar con Google".
+// - `use_fedcm_for_button={false}`: con FedCM, Chrome recuerda la sesión/consentimiento
+//   previo y reemplaza el botón por "Continuar como {nombre}", exponiendo la cuenta
+//   activa sin que el usuario haga click. Desactivarlo vuelve al flujo clásico de popup
+//   de Google (ventana de selección de cuenta), que siempre muestra el botón genérico
+//   sin importar la sesión del navegador — a costa de perder el selector nativo.
 // - `itp_support` habilita el mismo comportamiento "upgraded" en navegadores con
 //   Intelligent Tracking Prevention (Safari).
 export function GoogleLoginButton({ onError }: { onError: (mensaje: string) => void }) {
@@ -24,7 +24,7 @@ export function GoogleLoginButton({ onError }: { onError: (mensaje: string) => v
         shape="rectangular"
         text="continue_with"
         width={320}
-        use_fedcm_for_button
+        use_fedcm_for_button={false}
         itp_support
         onSuccess={(credentialResponse) => {
           if (credentialResponse.credential) {
