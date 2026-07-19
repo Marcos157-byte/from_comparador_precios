@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react';
 import type { Precio } from '@/domain/entities/precio.entity';
+import type { ListaComparacionResumen } from '@/domain/entities/lista-comparacion.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
 import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
 import { usePrecioStore } from '@/presentation/store/precio.store';
@@ -20,10 +21,20 @@ export function PreciosPage() {
   const errores = usePrecioStore((s) => s.error);
   const cargar = usePrecioStore((s) => s.cargar);
 
+  const listas = useComparadorStore((s) => s.listas);
   const agregandoAComparador = useComparadorStore((s) => s.cargando);
+  const cargarListas = useComparadorStore((s) => s.cargarListas);
   const agregarProducto = useComparadorStore((s) => s.agregarProducto);
+  const agregarProductoAListaElegida = useComparadorStore((s) => s.agregarProductoAListaElegida);
+  const crearLista = useComparadorStore((s) => s.crearLista);
+
   const [mensajeToast, setMensajeToast] = useState<string | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [popupElegirLista, setPopupElegirLista] = useState<{
+    idProducto: number;
+    idComercio: number;
+    nombreComercio: string;
+  } | null>(null);
 
   useEffect(() => {
     cargar(idProductoNum);
@@ -35,11 +46,36 @@ export function PreciosPage() {
     };
   }, []);
 
-  async function handleElegir(idProductoElegido: number, idComercio: number, nombreComercio: string) {
-    await agregarProducto(idProductoElegido, idComercio);
+  function mostrarToast(nombreComercio: string) {
     setMensajeToast(`Agregado a tu lista en ${nombreComercio}`);
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = setTimeout(() => setMensajeToast(null), 4000);
+  }
+
+  async function handleElegir(idProductoElegido: number, idComercio: number, nombreComercio: string) {
+    const listasActuales = await cargarListas();
+    if (listasActuales.length >= 2) {
+      setPopupElegirLista({ idProducto: idProductoElegido, idComercio, nombreComercio });
+      return;
+    }
+    await agregarProducto(idProductoElegido, idComercio);
+    mostrarToast(nombreComercio);
+  }
+
+  async function handleElegirEnLista(idLista: number) {
+    if (!popupElegirLista) return;
+    await agregarProductoAListaElegida(popupElegirLista.idProducto, popupElegirLista.idComercio, idLista);
+    mostrarToast(popupElegirLista.nombreComercio);
+    setPopupElegirLista(null);
+  }
+
+  async function handleCrearYElegir(nombre: string) {
+    if (!popupElegirLista) return;
+    const idNueva = await crearLista(nombre);
+    if (idNueva == null) return;
+    await agregarProductoAListaElegida(popupElegirLista.idProducto, popupElegirLista.idComercio, idNueva);
+    mostrarToast(popupElegirLista.nombreComercio);
+    setPopupElegirLista(null);
   }
 
   const precios = preciosPorProducto[idProductoNum];
@@ -56,7 +92,7 @@ export function PreciosPage() {
   const colorOscuro = `color-mix(in srgb, ${colorBarato} 70%, black)`;
 
   return (
-    <div className="relative min-h-svh bg-background">
+    <div className="relative min-h-full bg-background">
       <FondoPatron />
 
       <div className="relative">
@@ -82,7 +118,7 @@ export function PreciosPage() {
           </div>
         )}
 
-        <div className="px-4 pb-24 pt-4">
+        <div className="px-4 pb-36 pt-4">
           {estaCargando && !precios ? (
             <div className="flex justify-center py-20">
               <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -111,7 +147,7 @@ export function PreciosPage() {
           )}
         </div>
 
-        <div className="fixed inset-x-0 bottom-0 border-t border-border bg-card px-4 py-3">
+        <div className="fixed inset-x-0 bottom-16 border-t border-border bg-card px-4 py-3">
           <button
             type="button"
             onClick={() => navigate('/mi-lista')}
@@ -123,10 +159,100 @@ export function PreciosPage() {
         </div>
 
         {mensajeToast && (
-          <div className="fixed inset-x-4 bottom-20 z-50 rounded-lg bg-[#323232] px-4 py-3 text-center text-sm text-white shadow-lg">
+          <div className="fixed inset-x-4 bottom-36 z-50 rounded-lg bg-[#323232] px-4 py-3 text-center text-sm text-white shadow-lg">
             {mensajeToast}
           </div>
         )}
+      </div>
+
+      {popupElegirLista && (
+        <SeleccionarListaDialog
+          listas={listas}
+          onElegir={handleElegirEnLista}
+          onCrearYElegir={handleCrearYElegir}
+          onCancelar={() => setPopupElegirLista(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SeleccionarListaDialog({
+  listas,
+  onElegir,
+  onCrearYElegir,
+  onCancelar,
+}: {
+  listas: ListaComparacionResumen[];
+  onElegir: (idLista: number) => void;
+  onCrearYElegir: (nombre: string) => void;
+  onCancelar: () => void;
+}) {
+  const [creandoNueva, setCreandoNueva] = useState(false);
+  const [nombreNueva, setNombreNueva] = useState('');
+
+  function confirmarNueva() {
+    const nombreLimpio = nombreNueva.trim();
+    if (!nombreLimpio) return;
+    onCrearYElegir(nombreLimpio);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6" onClick={onCancelar}>
+      <div
+        className="w-full max-w-sm rounded-[20px] border border-border bg-card p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-base font-bold text-foreground">¿A qué lista lo agregamos?</p>
+
+        <div className="mt-4 flex max-h-64 flex-col gap-2 overflow-y-auto">
+          {listas.map((lista) => (
+            <button
+              key={lista.id}
+              type="button"
+              onClick={() => onElegir(lista.id)}
+              className="rounded-xl border border-border px-4 py-3 text-left text-sm font-semibold text-foreground"
+            >
+              {lista.nombre}
+            </button>
+          ))}
+        </div>
+
+        {creandoNueva ? (
+          <div className="mt-4 flex flex-col gap-2">
+            <input
+              autoFocus
+              value={nombreNueva}
+              onChange={(e) => setNombreNueva(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && confirmarNueva()}
+              placeholder="Ej. Lista de la oficina"
+              className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground outline-none focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={confirmarNueva}
+              disabled={!nombreNueva.trim()}
+              className="rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Crear y agregar aquí
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setCreandoNueva(true)}
+            className="mt-3 flex items-center gap-1.5 text-sm font-bold text-primary"
+          >
+            <Plus className="size-4" />
+            Nueva lista
+          </button>
+        )}
+
+        <div className="mt-4 flex justify-end">
+          <button type="button" onClick={onCancelar} className="px-2 py-1 text-sm font-semibold text-muted-foreground">
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,10 @@
 import type { ComparadorRepository } from '@/domain/ports/comparador-repository.port';
-import type { ListaComparacionDetalle } from '@/domain/entities/lista-comparacion.entity';
+import type { ListaComparacionDetalle, ListaComparacionResumen } from '@/domain/entities/lista-comparacion.entity';
+
+export interface CargarListaActivaResultado {
+  listas: ListaComparacionResumen[];
+  detalle: ListaComparacionDetalle | null;
+}
 
 export class CargarListaActivaUseCase {
   private readonly comparadorRepository: ComparadorRepository;
@@ -8,9 +13,11 @@ export class CargarListaActivaUseCase {
     this.comparadorRepository = comparadorRepository;
   }
 
-  async execute(): Promise<ListaComparacionDetalle | null> {
+  async execute(idPreferido?: number | null): Promise<CargarListaActivaResultado> {
     const listas = await this.comparadorRepository.listarListas();
-    if (listas.length === 0) return null;
-    return this.comparadorRepository.obtenerLista(listas[0].id);
+    const preferidaValida = idPreferido != null && listas.some((l) => l.id === idPreferido);
+    const idActivo = preferidaValida ? (idPreferido as number) : (listas[0]?.id ?? null);
+    const detalle = idActivo !== null ? await this.comparadorRepository.obtenerLista(idActivo) : null;
+    return { listas, detalle };
   }
 }

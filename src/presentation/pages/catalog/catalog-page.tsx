@@ -65,7 +65,7 @@ export function CatalogPage() {
   const colorOscuro = `color-mix(in srgb, ${ui.color} 75%, black)`;
 
   return (
-    <div className="relative min-h-svh bg-background">
+    <div className="relative min-h-full bg-background">
       <FondoPatron />
 
       <div className="relative">
