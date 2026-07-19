@@ -13,6 +13,7 @@ interface AuthStore {
   checkStoredSession: () => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   register: (dto: RegisterDto) => Promise<void>;
+  loginConGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -48,6 +49,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ status: AuthStatus.Checking, errorMessage: null });
     try {
       const user = await authUseCases.register.execute(dto);
+      set({ status: AuthStatus.Authenticated, user, errorMessage: null });
+    } catch (error) {
+      set({ status: AuthStatus.Unauthenticated, user: null, errorMessage: mensajeDeError(error) });
+    }
+  },
+
+  loginConGoogle: async (idToken) => {
+    set({ status: AuthStatus.Checking, errorMessage: null });
+    try {
+      const user = await authUseCases.loginConGoogle.execute({ idToken });
       set({ status: AuthStatus.Authenticated, user, errorMessage: null });
     } catch (error) {
       set({ status: AuthStatus.Unauthenticated, user: null, errorMessage: mensajeDeError(error) });

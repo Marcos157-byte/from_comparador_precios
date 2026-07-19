@@ -10,6 +10,7 @@ export interface RegisterPayload {
 export interface AuthRepository {
   login(username: string, password: string): Promise<LoggedUser>;
   register(payload: RegisterPayload): Promise<LoggedUser>;
+  loginConGoogle(idToken: string): Promise<LoggedUser>;
   logout(): Promise<void>;
   getStoredUser(): Promise<LoggedUser | null>;
 }

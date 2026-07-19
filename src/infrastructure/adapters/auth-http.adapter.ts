@@ -45,6 +45,18 @@ export class AuthHttpAdapter implements AuthRepository {
     }
   }
 
+  async loginConGoogle(idToken: string): Promise<LoggedUser> {
+    try {
+      const { data } = await axiosClient.post<StoredUserMap & { access: string; refresh: string }>(
+        '/auth/google/',
+        { id_token: idToken },
+      );
+      return this.guardarSesion(data);
+    } catch (error) {
+      throw parseLoginError(error);
+    }
+  }
+
   async logout(): Promise<void> {
     const refresh = localTokenStorage.getRefreshToken();
     if (refresh) {

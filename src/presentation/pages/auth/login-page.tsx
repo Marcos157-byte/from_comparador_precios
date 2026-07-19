@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
 import { useAuthStore } from '@/presentation/store/auth.store';
 import { AuthStatus } from '@/domain/enums/auth-status.enum';
@@ -14,15 +15,19 @@ export function LoginPage() {
   const status = useAuthStore((s) => s.status);
   const errorMessage = useAuthStore((s) => s.errorMessage);
   const login = useAuthStore((s) => s.login);
+  const loginConGoogle = useAuthStore((s) => s.loginConGoogle);
   const isLoading = status === AuthStatus.Checking;
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [obscurePassword, setObscurePassword] = useState(true);
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const mensajeError = errorMessage ?? googleError;
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setGoogleError(null);
     const usernameError = validateUsername(username);
     const passwordError = validatePassword(password);
     setErrors({ username: usernameError ?? undefined, password: passwordError ?? undefined });
@@ -40,13 +45,13 @@ export function LoginPage() {
         </h1>
         <p className="mt-2 text-center text-sm text-blue-600">COMPARA precios entre comercios</p>
 
-        {errorMessage && (
+        {mensajeError && (
           <div className="mt-10 rounded-xl border border-destructive bg-destructive/12 p-3 text-sm text-destructive">
-            {errorMessage}
+            {mensajeError}
           </div>
         )}
 
-        <div className={errorMessage ? 'mt-4' : 'mt-10'}>
+        <div className={mensajeError ? 'mt-4' : 'mt-10'}>
           <Label htmlFor="username">Usuario</Label>
           <div className="relative mt-1.5">
             <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -94,6 +99,26 @@ export function LoginPage() {
             'Iniciar sesión'
           )}
         </button>
+
+        <div className="mt-5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-xs font-medium text-muted-foreground">o continúa con</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => {
+              setGoogleError(null);
+              if (credentialResponse.credential) {
+                loginConGoogle(credentialResponse.credential);
+              } else {
+                setGoogleError('No se pudo iniciar sesión con Google.');
+              }
+            }}
+            onError={() => setGoogleError('No se pudo iniciar sesión con Google.')}
+          />
+        </div>
 
         <Link
           to="/register"
