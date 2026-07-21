@@ -4,7 +4,7 @@ import { PiggyBank, Scale, Search } from 'lucide-react';
 import type { ComercioLigero } from '@/domain/entities/comercio-ligero.entity';
 import type { Precio } from '@/domain/entities/precio.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
+import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
 import { productoUseCases } from '@/infrastructure/factories/producto.factory';
 import { comercioUseCases } from '@/infrastructure/factories/comercio.factory';
@@ -289,33 +289,36 @@ function ComercioChip({ comercio }: { comercio: ComercioLigero }) {
   const ui = tipoComercioUi[tipo];
   const colorBase = comercioBrandColor(comercio.nombre, ui.color);
   const mostrarLogo = Boolean(comercio.logoUrl) && !logoFallo;
+  const placaOscura = comercioLogoEsBlanco(comercio.nombre);
 
+  // Presentación "solo logo": el logo por sí solo identifica al comercio, sin
+  // nombre al lado (fila de logos de clientes). Placa blanca por defecto;
+  // color de marca solo para Coral/Ferrisariato (logo blanco puro).
   return (
     <div
-      className="flex shrink-0 items-center gap-2 rounded-xl border px-4 py-3"
-      style={{
-        backgroundColor: `color-mix(in srgb, ${colorBase} 8%, transparent)`,
-        borderColor: `color-mix(in srgb, ${colorBase} 25%, transparent)`,
-      }}
+      className={cn(
+        'flex size-20 shrink-0 items-center justify-center rounded-2xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]',
+        mostrarLogo && !placaOscura && 'border border-border bg-white',
+      )}
+      style={
+        mostrarLogo
+          ? placaOscura
+            ? { backgroundColor: colorBase }
+            : undefined
+          : { backgroundColor: `color-mix(in srgb, ${colorBase} 10%, transparent)` }
+      }
+      title={comercio.nombre}
     >
       {mostrarLogo ? (
-        <div
-          className="flex size-7 shrink-0 items-center justify-center rounded-lg"
-          style={{ backgroundColor: colorBase }}
-        >
-          <img
-            src={comercio.logoUrl ?? undefined}
-            alt={comercio.nombre}
-            onError={() => setLogoFallo(true)}
-            className="size-full rounded-lg object-contain p-1"
-          />
-        </div>
+        <img
+          src={comercio.logoUrl ?? undefined}
+          alt={comercio.nombre}
+          onError={() => setLogoFallo(true)}
+          className="size-full object-contain"
+        />
       ) : (
-        <span className="text-lg">{ui.emoji}</span>
+        <span className="text-3xl">{ui.emoji}</span>
       )}
-      <span className="whitespace-nowrap text-sm font-bold" style={{ color: colorBase }}>
-        {comercio.nombre}
-      </span>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Scale, X } from 'lucide-react';
 import type { ItemComparacion, TotalPorComercio } from '@/domain/entities/lista-comparacion.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
+import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { tieneDelivery, urlDelivery, urlMaps } from '@/domain/services/comercio-links.service';
 import { useComparadorStore } from '@/presentation/store/comparador.store';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
@@ -189,6 +189,7 @@ function ComercioGrupo({
   const ui = tipoComercioUi[tipo];
   const colorBase = comercioBrandColor(total.nombreComercio, ui.color);
   const mostrarLogo = Boolean(comercioDetalle?.logoUrl) && !logoFallo;
+  const placaOscura = comercioLogoEsBlanco(total.nombreComercio);
   const mostrarDelivery = tieneDelivery(total.nombreComercio);
   const linkMaps = urlMaps(total.nombreComercio);
 
@@ -198,17 +199,17 @@ function ComercioGrupo({
         className="flex items-center justify-between p-4"
         style={{ backgroundColor: `color-mix(in srgb, ${colorBase} 8%, transparent)` }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {mostrarLogo ? (
             <div
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg"
-              style={{ backgroundColor: colorBase }}
+              className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl', !placaOscura && 'border border-border bg-white')}
+              style={placaOscura ? { backgroundColor: colorBase } : undefined}
             >
               <img
                 src={comercioDetalle?.logoUrl ?? undefined}
                 alt={total.nombreComercio}
                 onError={() => setLogoFallo(true)}
-                className="size-full rounded-lg object-contain p-1"
+                className="size-full rounded-xl object-contain p-1.5"
               />
             </div>
           ) : (

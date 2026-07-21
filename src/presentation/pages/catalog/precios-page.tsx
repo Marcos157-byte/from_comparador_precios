@@ -4,7 +4,7 @@ import { ArrowLeft, Plus, ShoppingCart } from 'lucide-react';
 import type { Precio } from '@/domain/entities/precio.entity';
 import type { ListaComparacionResumen } from '@/domain/entities/lista-comparacion.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
+import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { usePrecioStore } from '@/presentation/store/precio.store';
 import { useComparadorStore } from '@/presentation/store/comparador.store';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
@@ -276,6 +276,7 @@ function PrecioCard({
   const ui = tipoComercioUi[tipo];
   const colorBase = comercio ? comercioBrandColor(comercio.nombre, ui.color) : ui.color;
   const mostrarLogo = Boolean(comercio?.logoUrl) && !logoFallo;
+  const placaOscura = comercioLogoEsBlanco(comercio?.nombre ?? '');
 
   return (
     <div
@@ -288,20 +289,21 @@ function PrecioCard({
       <div className="flex items-center gap-3.5">
         <div
           className={cn(
-            'flex size-[52px] shrink-0 items-center justify-center rounded-2xl',
+            'flex size-16 shrink-0 items-center justify-center rounded-2xl',
             !mostrarLogo && 'border border-border bg-card',
+            mostrarLogo && !placaOscura && 'border border-border bg-white',
           )}
-          style={mostrarLogo ? { backgroundColor: colorBase } : undefined}
+          style={mostrarLogo && placaOscura ? { backgroundColor: colorBase } : undefined}
         >
           {mostrarLogo ? (
             <img
               src={comercio?.logoUrl ?? undefined}
               alt={comercio?.nombre}
               onError={() => setLogoFallo(true)}
-              className="size-full rounded-2xl object-contain p-1.5"
+              className="size-full rounded-2xl object-contain p-2"
             />
           ) : (
-            <span className="text-xl">{ui.emoji}</span>
+            <span className="text-2xl">{ui.emoji}</span>
           )}
         </div>
 

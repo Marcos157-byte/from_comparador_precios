@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { ComercioLigero } from '@/domain/entities/comercio-ligero.entity';
 import type { Precio } from '@/domain/entities/precio.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
+import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { useComercioStore } from '@/presentation/store/comercio.store';
 import { usePrecioStore } from '@/presentation/store/precio.store';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
@@ -168,33 +168,39 @@ function ComercioTile({ comercio, onClick }: { comercio: ComercioLigero; onClick
   const ui = tipoComercioUi[tipo];
   const colorBase = comercioBrandColor(comercio.nombre, ui.color);
   const mostrarLogo = Boolean(comercio.logoUrl) && !logoFallo;
+  const placaOscura = comercioLogoEsBlanco(comercio.nombre);
 
+  // Presentación "solo logo": el logo por sí solo identifica al comercio, sin
+  // nombre ni emoji al lado (como una fila de logos de clientes). Placa blanca
+  // por defecto (funciona para logos a color); placa de color de marca solo
+  // para Coral/Ferrisariato, cuyo logo es blanco puro y desaparecería en blanco.
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex aspect-square flex-col items-center justify-center gap-2 rounded-[20px] p-3 text-center"
-      style={{
-        background: `linear-gradient(135deg, ${colorBase}, color-mix(in srgb, ${colorBase} 75%, black))`,
-        boxShadow: `0 6px 14px color-mix(in srgb, ${colorBase} 35%, transparent)`,
-      }}
+      title={comercio.nombre}
+      className={cn(
+        'flex aspect-square items-center justify-center rounded-[20px] p-5 shadow-[0_2px_10px_rgba(0,0,0,0.06)]',
+        mostrarLogo && !placaOscura && 'border border-border bg-white',
+      )}
+      style={
+        mostrarLogo
+          ? placaOscura
+            ? { backgroundColor: colorBase }
+            : undefined
+          : { background: `linear-gradient(135deg, ${colorBase}, color-mix(in srgb, ${colorBase} 75%, black))` }
+      }
     >
-      <div
-        className={cn('flex size-14 items-center justify-center rounded-2xl', !mostrarLogo && 'bg-white/20')}
-        style={mostrarLogo ? { backgroundColor: colorBase } : undefined}
-      >
-        {mostrarLogo ? (
-          <img
-            src={comercio.logoUrl ?? undefined}
-            alt={comercio.nombre}
-            onError={() => setLogoFallo(true)}
-            className="size-full rounded-2xl object-contain p-1.5"
-          />
-        ) : (
-          <span className="text-2xl">{ui.emoji}</span>
-        )}
-      </div>
-      <span className="text-sm font-bold text-white">{comercio.nombre}</span>
+      {mostrarLogo ? (
+        <img
+          src={comercio.logoUrl ?? undefined}
+          alt={comercio.nombre}
+          onError={() => setLogoFallo(true)}
+          className="size-full object-contain"
+        />
+      ) : (
+        <span className="text-4xl">{ui.emoji}</span>
+      )}
     </button>
   );
 }
