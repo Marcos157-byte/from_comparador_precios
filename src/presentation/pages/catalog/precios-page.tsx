@@ -8,6 +8,7 @@ import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
 import { usePrecioStore } from '@/presentation/store/precio.store';
 import { useComparadorStore } from '@/presentation/store/comparador.store';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
+import { cn } from '@/presentation/utils/cn';
 
 const formatoPrecio = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
@@ -285,13 +286,19 @@ function PrecioCard({
       }}
     >
       <div className="flex items-center gap-3.5">
-        <div className="flex size-[52px] shrink-0 items-center justify-center rounded-2xl border border-border bg-card">
+        <div
+          className={cn(
+            'flex size-[52px] shrink-0 items-center justify-center rounded-2xl',
+            !mostrarLogo && 'border border-border bg-card',
+          )}
+          style={mostrarLogo ? { backgroundColor: colorBase } : undefined}
+        >
           {mostrarLogo ? (
             <img
               src={comercio?.logoUrl ?? undefined}
               alt={comercio?.nombre}
               onError={() => setLogoFallo(true)}
-              className="size-full rounded-2xl object-contain"
+              className="size-full rounded-2xl object-contain p-1.5"
             />
           ) : (
             <span className="text-xl">{ui.emoji}</span>

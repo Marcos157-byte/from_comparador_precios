@@ -284,9 +284,11 @@ function StatInline({ valor, etiqueta }: { valor: string; etiqueta: string }) {
 }
 
 function ComercioChip({ comercio }: { comercio: ComercioLigero }) {
+  const [logoFallo, setLogoFallo] = useState(false);
   const tipo = tipoComercioFromValue(comercio.tipo);
   const ui = tipoComercioUi[tipo];
   const colorBase = comercioBrandColor(comercio.nombre, ui.color);
+  const mostrarLogo = Boolean(comercio.logoUrl) && !logoFallo;
 
   return (
     <div
@@ -296,7 +298,21 @@ function ComercioChip({ comercio }: { comercio: ComercioLigero }) {
         borderColor: `color-mix(in srgb, ${colorBase} 25%, transparent)`,
       }}
     >
-      <span className="text-lg">{ui.emoji}</span>
+      {mostrarLogo ? (
+        <div
+          className="flex size-7 shrink-0 items-center justify-center rounded-lg"
+          style={{ backgroundColor: colorBase }}
+        >
+          <img
+            src={comercio.logoUrl ?? undefined}
+            alt={comercio.nombre}
+            onError={() => setLogoFallo(true)}
+            className="size-full rounded-lg object-contain p-1"
+          />
+        </div>
+      ) : (
+        <span className="text-lg">{ui.emoji}</span>
+      )}
       <span className="whitespace-nowrap text-sm font-bold" style={{ color: colorBase }}>
         {comercio.nombre}
       </span>

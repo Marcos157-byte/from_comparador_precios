@@ -8,6 +8,7 @@ import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
 import { useComercioStore } from '@/presentation/store/comercio.store';
 import { usePrecioStore } from '@/presentation/store/precio.store';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
+import { cn } from '@/presentation/utils/cn';
 
 const formatoPrecio = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
@@ -178,7 +179,10 @@ function ComercioTile({ comercio, onClick }: { comercio: ComercioLigero; onClick
         boxShadow: `0 6px 14px color-mix(in srgb, ${colorBase} 35%, transparent)`,
       }}
     >
-      <div className="flex size-14 items-center justify-center rounded-2xl bg-white/20">
+      <div
+        className={cn('flex size-14 items-center justify-center rounded-2xl', !mostrarLogo && 'bg-white/20')}
+        style={mostrarLogo ? { backgroundColor: colorBase } : undefined}
+      >
         {mostrarLogo ? (
           <img
             src={comercio.logoUrl ?? undefined}

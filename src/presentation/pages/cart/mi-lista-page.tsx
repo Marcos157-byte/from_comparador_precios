@@ -183,9 +183,12 @@ function ComercioGrupo({
   items: ItemComparacion[];
   onQuitar: (idItem: number) => void;
 }) {
-  const tipo = tipoComercioFromValue(items[0]?.comercioDetalle.tipo ?? '');
+  const [logoFallo, setLogoFallo] = useState(false);
+  const comercioDetalle = items[0]?.comercioDetalle;
+  const tipo = tipoComercioFromValue(comercioDetalle?.tipo ?? '');
   const ui = tipoComercioUi[tipo];
   const colorBase = comercioBrandColor(total.nombreComercio, ui.color);
+  const mostrarLogo = Boolean(comercioDetalle?.logoUrl) && !logoFallo;
   const mostrarDelivery = tieneDelivery(total.nombreComercio);
   const linkMaps = urlMaps(total.nombreComercio);
 
@@ -196,7 +199,21 @@ function ComercioGrupo({
         style={{ backgroundColor: `color-mix(in srgb, ${colorBase} 8%, transparent)` }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">{ui.emoji}</span>
+          {mostrarLogo ? (
+            <div
+              className="flex size-8 shrink-0 items-center justify-center rounded-lg"
+              style={{ backgroundColor: colorBase }}
+            >
+              <img
+                src={comercioDetalle?.logoUrl ?? undefined}
+                alt={total.nombreComercio}
+                onError={() => setLogoFallo(true)}
+                className="size-full rounded-lg object-contain p-1"
+              />
+            </div>
+          ) : (
+            <span className="text-xl">{ui.emoji}</span>
+          )}
           <span className="font-bold text-foreground">{total.nombreComercio}</span>
         </div>
         <span className="font-bold" style={{ color: colorBase }}>
