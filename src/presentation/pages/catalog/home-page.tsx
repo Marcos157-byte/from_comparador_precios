@@ -1,17 +1,52 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Megaphone } from 'lucide-react';
+import type { Producto } from '@/domain/entities/producto.entity';
 import { useAuthStore } from '@/presentation/store/auth.store';
 import { TipoComercio } from '@/domain/enums/tipo-comercio.enum';
-import { tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
+import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
+import { ProductoCard } from '@/presentation/components/producto-card';
+import { precioUseCases } from '@/infrastructure/factories/precio.factory';
 
 const NAVY = '#1A237E';
 const ANUNCIO_VIDEO_URL = 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4';
 
+// Confirmados por consulta directa a la base de datos real (curl contra
+// /kache/precios/?producto=<id>): cada uno tiene exactamente 2 comercios con
+// precio vigente, y ninguno está entre los casos sospechosos de la auditoría de
+// falsos positivos. La gran mayoría del catálogo hoy solo tiene 1 comercio, así
+// que esta lista asegura que la comparación se vea funcionando de verdad en vez
+// de depender de que la búsqueda encuentre uno de los pocos casos reales al azar.
+const IDS_PRODUCTOS_DESTACADOS = [224, 179, 608, 748, 211];
+
+interface ProductoDestacado {
+  producto: Producto;
+  emoji: string;
+}
+
 export function HomePage() {
   const username = useAuthStore((s) => s.user?.username) ?? '';
+  const [productosDestacados, setProductosDestacados] = useState<ProductoDestacado[] | null>(null);
+
+  useEffect(() => {
+    Promise.all(
+      IDS_PRODUCTOS_DESTACADOS.map((id) =>
+        precioUseCases.listarPorProducto.execute(id).then((precios) => {
+          const producto = precios[0]?.productoDetalle;
+          if (!producto) return null;
+          const tipo = tipoComercioFromValue(precios[0].comercioDetalle?.tipo ?? '');
+          return { producto, emoji: tipoComercioUi[tipo].emoji };
+        }),
+      ),
+    )
+      .then((resultados) => {
+        const validos = resultados.filter((r): r is ProductoDestacado => r !== null);
+        setProductosDestacados(validos);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="relative min-h-full bg-background">
@@ -59,6 +94,21 @@ export function HomePage() {
             </div>
           </div>
         </div>
+
+        {productosDestacados && productosDestacados.length > 0 && (
+          <div className="mt-8 lg:mt-10">
+            <h2 className="text-[22px] font-bold text-foreground lg:text-xl">Compará estos productos ahora</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Productos con precios de más de un comercio, listos para comparar.
+            </p>
+
+            <div className="mt-3.5 grid grid-cols-2 gap-3.5 lg:grid-cols-5 lg:gap-4">
+              {productosDestacados.map(({ producto, emoji }) => (
+                <ProductoCard key={producto.id} producto={producto} emojiFallback={emoji} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
