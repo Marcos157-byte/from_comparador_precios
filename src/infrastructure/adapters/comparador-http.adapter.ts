@@ -102,4 +102,11 @@ export class ComparadorHttpAdapter implements ComparadorRepository {
   async eliminarLista(id: number): Promise<void> {
     await axiosClient.delete(`/kache/listas-comparacion/${id}/`);
   }
+
+  async renombrarLista(id: number, nuevoNombre: string): Promise<ListaComparacionResumen> {
+    const { data } = await axiosClient.patch<ListaComparacionResumenRaw>(`/kache/listas-comparacion/${id}/`, {
+      nombre: nuevoNombre,
+    });
+    return { id: data.id_lista, nombre: data.nombre };
+  }
 }

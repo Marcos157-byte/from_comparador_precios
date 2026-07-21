@@ -10,4 +10,5 @@ export interface ComparadorRepository {
   agregarItem(listaId: number, idProducto: number, idComercio: number): Promise<void>;
   eliminarItem(itemId: number): Promise<void>;
   eliminarLista(id: number): Promise<void>;
+  renombrarLista(id: number, nuevoNombre: string): Promise<ListaComparacionResumen>;
 }

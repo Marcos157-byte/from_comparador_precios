@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Scale, Trash2, X } from 'lucide-react';
+import { Pencil, Plus, Scale, Trash2, X } from 'lucide-react';
 import type {
   ItemComparacion,
   ListaComparacionResumen,
@@ -29,6 +29,7 @@ export function MiListaPage() {
   const crearLista = useComparadorStore((s) => s.crearLista);
   const quitarItem = useComparadorStore((s) => s.quitarItem);
   const eliminarLista = useComparadorStore((s) => s.eliminarLista);
+  const renombrarLista = useComparadorStore((s) => s.renombrarLista);
 
   const [mostrarNuevaLista, setMostrarNuevaLista] = useState(false);
   const [listaAEliminar, setListaAEliminar] = useState<ListaComparacionResumen | null>(null);
@@ -56,32 +57,14 @@ export function MiListaPage() {
 
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {listas.map((lista) => (
-              <div
+              <ListaChip
                 key={lista.id}
-                className={cn(
-                  'flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full py-1 pl-4 pr-1.5 text-sm font-bold',
-                  lista.id === listaActivaId
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground',
-                )}
-              >
-                <button type="button" onClick={() => setListaActiva(lista.id)} className="py-1">
-                  {lista.nombre}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setListaAEliminar(lista)}
-                  aria-label={`Eliminar lista "${lista.nombre}"`}
-                  className={cn(
-                    'flex size-6 shrink-0 items-center justify-center rounded-full',
-                    lista.id === listaActivaId
-                      ? 'text-primary-foreground/70 hover:text-primary-foreground'
-                      : 'text-muted-foreground/60 hover:text-destructive',
-                  )}
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
+                lista={lista}
+                activa={lista.id === listaActivaId}
+                onSeleccionar={() => setListaActiva(lista.id)}
+                onEliminar={() => setListaAEliminar(lista)}
+                onRenombrar={(nuevoNombre) => renombrarLista(lista.id, nuevoNombre)}
+              />
             ))}
             <button
               type="button"
@@ -154,6 +137,123 @@ export function MiListaPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function ListaChip({
+  lista,
+  activa,
+  onSeleccionar,
+  onEliminar,
+  onRenombrar,
+}: {
+  lista: ListaComparacionResumen;
+  activa: boolean;
+  onSeleccionar: () => void;
+  onEliminar: () => void;
+  onRenombrar: (nuevoNombre: string) => Promise<void>;
+}) {
+  const [editando, setEditando] = useState(false);
+  const [nombre, setNombre] = useState(lista.nombre);
+  const [guardando, setGuardando] = useState(false);
+
+  useEffect(() => {
+    if (!editando) setNombre(lista.nombre);
+  }, [lista.nombre, editando]);
+
+  async function confirmar() {
+    const nombreLimpio = nombre.trim();
+    // Mismo criterio que "Nueva lista": no se permite guardar un nombre vacío.
+    // Si el usuario lo deja vacío, se revierte al nombre anterior en vez de guardar.
+    if (!nombreLimpio || nombreLimpio === lista.nombre) {
+      setNombre(lista.nombre);
+      setEditando(false);
+      return;
+    }
+    setGuardando(true);
+    await onRenombrar(nombreLimpio);
+    setGuardando(false);
+    setEditando(false);
+  }
+
+  function cancelar() {
+    setNombre(lista.nombre);
+    setEditando(false);
+  }
+
+  if (editando) {
+    return (
+      <div
+        className={cn(
+          'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full py-1 pl-3 pr-2 text-sm font-bold',
+          activa ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+        )}
+      >
+        <input
+          autoFocus
+          value={nombre}
+          disabled={guardando}
+          onChange={(e) => setNombre(e.target.value)}
+          onBlur={confirmar}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              confirmar();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              cancelar();
+            }
+          }}
+          className={cn(
+            'w-28 rounded-full border border-dashed bg-background/90 px-2 py-1 text-sm font-bold text-foreground outline-none focus:border-solid',
+            activa ? 'border-primary-foreground/60 focus:border-primary-foreground' : 'border-border focus:border-primary',
+          )}
+        />
+        {guardando && (
+          <span
+            className={cn(
+              'size-3.5 shrink-0 animate-spin rounded-full border-2 border-t-transparent',
+              activa ? 'border-primary-foreground' : 'border-muted-foreground',
+            )}
+          />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full py-1 pl-4 pr-1.5 text-sm font-bold',
+        activa ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+      )}
+    >
+      <button type="button" onClick={onSeleccionar} className="py-1">
+        {lista.nombre}
+      </button>
+      <button
+        type="button"
+        onClick={() => setEditando(true)}
+        aria-label={`Renombrar lista "${lista.nombre}"`}
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded-full',
+          activa ? 'text-primary-foreground/70 hover:text-primary-foreground' : 'text-muted-foreground/60 hover:text-foreground',
+        )}
+      >
+        <Pencil className="size-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={onEliminar}
+        aria-label={`Eliminar lista "${lista.nombre}"`}
+        className={cn(
+          'flex size-6 shrink-0 items-center justify-center rounded-full',
+          activa ? 'text-primary-foreground/70 hover:text-primary-foreground' : 'text-muted-foreground/60 hover:text-destructive',
+        )}
+      >
+        <Trash2 className="size-3.5" />
+      </button>
     </div>
   );
 }

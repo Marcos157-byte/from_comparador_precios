@@ -31,6 +31,7 @@ interface ComparadorStore {
   agregarProductoAListaElegida: (idProducto: number, idComercio: number, idLista: number) => Promise<void>;
   quitarItem: (idItem: number) => Promise<void>;
   eliminarLista: (id: number) => Promise<void>;
+  renombrarLista: (id: number, nuevoNombre: string) => Promise<void>;
 }
 
 export const useComparadorStore = create<ComparadorStore>((set, get) => ({
@@ -190,6 +191,20 @@ export const useComparadorStore = create<ComparadorStore>((set, get) => ({
       set({ listas: listasRestantes, listaActivaId: siguienteId, detalle, cargando: false });
     } catch {
       set({ cargando: false, error: 'No se pudo eliminar la lista.' });
+    }
+  },
+
+  renombrarLista: async (id, nuevoNombre) => {
+    set({ cargando: true, error: null });
+    try {
+      const actualizada = await comparadorUseCases.renombrarLista.execute(id, nuevoNombre);
+      set((state) => ({
+        listas: state.listas.map((l) => (l.id === id ? { ...l, nombre: actualizada.nombre } : l)),
+        detalle: state.detalle && state.detalle.id === id ? { ...state.detalle, nombre: actualizada.nombre } : state.detalle,
+        cargando: false,
+      }));
+    } catch {
+      set({ cargando: false, error: 'No se pudo renombrar la lista.' });
     }
   },
 }));
