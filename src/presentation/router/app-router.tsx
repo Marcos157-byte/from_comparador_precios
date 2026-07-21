@@ -4,6 +4,7 @@ import { useAuthStore } from '@/presentation/store/auth.store';
 import { AuthStatus } from '@/domain/enums/auth-status.enum';
 import { LoginPage } from '@/presentation/pages/auth/login-page';
 import { RegisterPage } from '@/presentation/pages/auth/register-page';
+import { LandingPage } from '@/presentation/pages/landing/landing-page';
 import { HomePage } from '@/presentation/pages/catalog/home-page';
 import { ExplorarPage } from '@/presentation/pages/catalog/explorar-page';
 import { ExplorarComercioPage } from '@/presentation/pages/catalog/explorar-comercio-page';
@@ -55,8 +56,18 @@ export function AppRouter() {
     // tamaño estable; el scroll real ocurre en el div hijo de abajo. Así, el nav (o
     // cualquier `fixed` de cualquier página) "salta" el div que scrollea sin verse
     // afectado por su posición de scroll, y se ancla de verdad al shell estable.
-    <div className="min-h-viewport-dinamico w-full bg-neutral-200">
-      <div className="relative mx-auto h-viewport-dinamico w-full max-w-[480px] transform-gpu bg-background shadow-xl">
+    //
+    // Responsive (bloque 1 del rediseño desktop): por debajo de `lg` (1024px) esto seguí
+    // siendo la "tarjeta de teléfono" de siempre (max-w-[480px], centrada, con sombra).
+    // A partir de `lg` el shell pasa a ocupar el viewport completo (`lg:max-w-none`, sin
+    // sombra) — es el mismo containing-block estable de antes, solo que ahora más ancho,
+    // para que un `fixed inset-x-0` (la navbar superior de escritorio, o el bottom nav en
+    // mobile) se estire de punta a punta como en un sitio real, no como una tarjeta.
+    // El ancho "razonable" del CONTENIDO (max-w-7xl centrado) se aplica un nivel más
+    // adentro, en main-layout.tsx — no acá, porque este shell también envuelve
+    // Login/Register/Landing, que no deberían heredar ese padding.
+    <div className="min-h-viewport-dinamico w-full bg-neutral-200 lg:bg-background">
+      <div className="relative mx-auto h-viewport-dinamico w-full max-w-[480px] transform-gpu bg-background shadow-xl lg:max-w-none lg:shadow-none">
         <div className="size-full overflow-y-auto">
           {status === AuthStatus.Checking ? (
             <div className="flex min-h-full items-center justify-center bg-background">
@@ -64,6 +75,8 @@ export function AppRouter() {
             </div>
           ) : status === AuthStatus.Unauthenticated ? (
             <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="*" element={<LoginPage />} />
             </Routes>
