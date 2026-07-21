@@ -29,15 +29,17 @@ export function ExplorarPage() {
     <div className="relative min-h-full bg-background">
       <FondoPatron />
 
-      <div className="relative overflow-hidden rounded-b-[28px] bg-white px-5 pt-14 shadow-[0_3px_10px_rgba(0,0,0,0.06)]">
-        <div className="absolute left-0 top-2.5">
+      <div className="relative overflow-hidden rounded-b-[28px] bg-white px-5 pt-14 shadow-[0_3px_10px_rgba(0,0,0,0.06)] lg:rounded-2xl lg:px-8 lg:pb-8 lg:pt-8 lg:shadow-none lg:border lg:border-border">
+        {/* Rombos + wordmark — solo mobile. En desktop la navbar superior (main-layout.tsx)
+            ya cubre el branding, así que este bloque quedaría duplicado. */}
+        <div className="absolute left-0 top-2.5 lg:hidden">
           <TiraRombosCentrada width={180} height={50} />
         </div>
-        <div className="relative pb-4 pt-2.5">
-          <p className="text-right text-[22px] font-bold" style={{ color: NAVY }}>
+        <div className="relative pb-4 pt-2.5 lg:pb-0 lg:pt-0">
+          <p className="text-right text-[22px] font-bold lg:hidden" style={{ color: NAVY }}>
             PreciosEC
           </p>
-          <p className="mt-2 text-xl font-bold text-[#333333]">Explorar</p>
+          <p className="mt-2 text-xl font-bold text-[#333333] lg:mt-0 lg:text-2xl">Explorar</p>
 
           <button
             type="button"
@@ -48,7 +50,7 @@ export function ExplorarPage() {
             Explorar por comercio
           </button>
 
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white px-3 py-1 shadow-[0_4px_12px_rgba(0,0,0,0.08)] lg:mt-4 lg:max-w-xl lg:border lg:border-border lg:shadow-none">
             <Search className="size-[18px] shrink-0 text-primary" />
             <input
               value={busqueda}
@@ -69,7 +71,11 @@ export function ExplorarPage() {
         </div>
       </div>
 
-      <div className="relative px-5 pb-8 pt-4">
+      {/* Resultados: se mantienen como lista vertical (no grilla) también en desktop —
+          cada fila ya es un layout horizontal ícono+nombre+precio+flecha, pensado para
+          lectura de izquierda a derecha; forzarlo a columnas lo fragmentaría. Se acota
+          el ancho y se centra para que la lectura no se estire a los 1280px completos. */}
+      <div className="relative px-5 pb-8 pt-4 lg:mx-auto lg:max-w-2xl lg:px-0 lg:pt-6">
         {busqueda.trim() === '' ? (
           <div className="flex flex-col items-center gap-4 py-20 text-center">
             <Search className="size-16 text-muted-foreground" />

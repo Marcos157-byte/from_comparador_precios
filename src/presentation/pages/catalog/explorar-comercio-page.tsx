@@ -62,7 +62,7 @@ export function ExplorarComercioPage() {
         <FondoPatron />
 
         <div className="relative">
-          <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-3">
+          <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-3 lg:rounded-2xl lg:border lg:px-6 lg:py-4">
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -70,10 +70,10 @@ export function ExplorarComercioPage() {
             >
               <ArrowLeft className="size-5" />
             </button>
-            <span className="text-base font-bold text-foreground">Explorar por comercio</span>
+            <span className="text-base font-bold text-foreground lg:text-lg">Explorar por comercio</span>
           </div>
 
-          <div className="px-5 pb-8 pt-5">
+          <div className="px-5 pb-8 pt-5 lg:px-0 lg:pt-6">
             {cargandoComercios && comercios.length === 0 ? (
               <div className="flex justify-center py-20">
                 <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -81,7 +81,7 @@ export function ExplorarComercioPage() {
             ) : errorComercios ? (
               <p className="text-center text-destructive">{errorComercios}</p>
             ) : (
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-6 lg:gap-5">
                 {comercios.map((comercio) => (
                   <ComercioTile
                     key={comercio.id}
@@ -113,7 +113,7 @@ export function ExplorarComercioPage() {
 
       <div className="relative">
         <div
-          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12"
+          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12 lg:rounded-2xl lg:px-6 lg:py-6"
           style={{ background: `linear-gradient(135deg, ${colorBase}, ${colorOscuro})` }}
         >
           <button
@@ -127,7 +127,7 @@ export function ExplorarComercioPage() {
           <span className="text-lg font-bold text-white">{comercioActual?.nombre ?? 'Comercio'}</span>
         </div>
 
-        <div className="px-5 pb-5 pt-5">
+        <div className="px-5 pb-5 pt-5 lg:px-0 lg:pt-6">
           {estaCargando && !precios ? (
             <div className="flex justify-center py-20">
               <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -141,7 +141,7 @@ export function ExplorarComercioPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-5 lg:gap-5">
                 {precios.map((precio) => (
                   <PrecioComercioCard key={precio.id} precio={precio} emojiFallback={ui.emoji} />
                 ))}

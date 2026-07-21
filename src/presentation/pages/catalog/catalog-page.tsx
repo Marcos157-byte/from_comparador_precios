@@ -70,7 +70,7 @@ export function CatalogPage() {
 
       <div className="relative">
         <div
-          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12"
+          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12 lg:rounded-2xl lg:px-6 lg:py-6"
           style={{ background: `linear-gradient(135deg, ${ui.color}, ${colorOscuro})` }}
         >
           <button
@@ -84,7 +84,7 @@ export function CatalogPage() {
           <span className="text-lg font-bold text-white">{nombreCategoria}</span>
         </div>
 
-        <div className="px-5 pb-5 pt-5">
+        <div className="px-5 pb-5 pt-5 lg:px-0 lg:pt-6">
           {estaCargando && !productos ? (
             <div className="flex justify-center py-20">
               <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -98,7 +98,7 @@ export function CatalogPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-5 lg:gap-5">
                 {productos.map((producto) => (
                   <ProductoCard key={producto.id} producto={producto} emojiFallback={ui.emoji} />
                 ))}

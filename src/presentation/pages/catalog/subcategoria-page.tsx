@@ -60,7 +60,7 @@ export function SubcategoriaPage() {
 
       <div className="relative">
         <div
-          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12"
+          className="flex items-center gap-2 rounded-b-[28px] px-3 pb-6 pt-12 lg:rounded-2xl lg:px-6 lg:py-6"
           style={{ background: `linear-gradient(135deg, ${ui.color}, ${colorOscuro})` }}
         >
           <button
@@ -74,7 +74,7 @@ export function SubcategoriaPage() {
           <span className="text-lg font-bold text-white">{ui.label}</span>
         </div>
 
-        <div className="px-5 pb-5 pt-5">
+        <div className="px-5 pb-5 pt-5 lg:px-0 lg:pt-6">
           {cargando && !cargadas ? (
             <div className="flex justify-center py-20">
               <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -87,7 +87,7 @@ export function SubcategoriaPage() {
               <p className="text-muted-foreground">Próximamente más categorías</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4 lg:gap-5">
               {subcategorias.map((cat, index) => {
                 const color = PALETA[index % PALETA.length];
                 const emoji = EMOJIS_SUBCATEGORIA[cat.nombre] ?? ui.emoji;
@@ -98,7 +98,7 @@ export function SubcategoriaPage() {
                     onClick={() =>
                       navigate(`/catalog/${tipo}/${cat.id}`, { state: { nombreCategoria: cat.nombre } })
                     }
-                    className="flex aspect-[1.1] flex-col items-center justify-center rounded-[20px] p-4 text-center"
+                    className="flex aspect-[1.1] flex-col items-center justify-center rounded-[20px] p-4 text-center lg:aspect-[1.6]"
                     style={{
                       background: `linear-gradient(135deg, ${color}, color-mix(in srgb, ${color} 75%, black))`,
                       boxShadow: `0 6px 12px color-mix(in srgb, ${color} 30%, transparent)`,

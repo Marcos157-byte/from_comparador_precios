@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Producto } from '@/domain/entities/producto.entity';
 import { productoUseCases } from '@/infrastructure/factories/producto.factory';
+import { dedupeById } from '@/presentation/utils/dedupe-by-id';
 
 interface ProductoStore {
   productosPorCategoria: Record<number, Producto[]>;
@@ -62,7 +63,7 @@ export const useProductoStore = create<ProductoStore>((set, get) => ({
       set((state) => ({
         productosPorCategoria: {
           ...state.productosPorCategoria,
-          [idCategoria]: [...(state.productosPorCategoria[idCategoria] ?? []), ...results],
+          [idCategoria]: dedupeById(state.productosPorCategoria[idCategoria] ?? [], results),
         },
         paginaPorCategoria: { ...state.paginaPorCategoria, [idCategoria]: siguientePagina },
         siguientePorCategoria: { ...state.siguientePorCategoria, [idCategoria]: next },
@@ -89,12 +90,12 @@ export const useProductoStore = create<ProductoStore>((set, get) => ({
       errorTipo: { ...state.errorTipo, [tipo]: null },
     }));
     try {
-      const acumulado: Producto[] = [];
+      let acumulado: Producto[] = [];
       let pagina = 1;
       let siguiente: string | null;
       do {
         const { results, next } = await productoUseCases.listar.execute({ tipo, page: pagina });
-        acumulado.push(...results);
+        acumulado = dedupeById(acumulado, results);
         siguiente = next;
         pagina += 1;
       } while (siguiente);

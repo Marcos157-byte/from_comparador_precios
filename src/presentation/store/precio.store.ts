@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Precio } from '@/domain/entities/precio.entity';
 import { precioUseCases } from '@/infrastructure/factories/precio.factory';
+import { dedupeById } from '@/presentation/utils/dedupe-by-id';
 
 interface PrecioStore {
   preciosPorProducto: Record<number, Precio[]>;
@@ -83,7 +84,7 @@ export const usePrecioStore = create<PrecioStore>((set, get) => ({
       set((state) => ({
         preciosPorComercio: {
           ...state.preciosPorComercio,
-          [idComercio]: [...(state.preciosPorComercio[idComercio] ?? []), ...results],
+          [idComercio]: dedupeById(state.preciosPorComercio[idComercio] ?? [], results),
         },
         paginaPorComercio: { ...state.paginaPorComercio, [idComercio]: siguientePagina },
         siguientePorComercio: { ...state.siguientePorComercio, [idComercio]: next },
