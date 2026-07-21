@@ -98,4 +98,8 @@ export class ComparadorHttpAdapter implements ComparadorRepository {
   async eliminarItem(itemId: number): Promise<void> {
     await axiosClient.delete(`/kache/items-comparacion/${itemId}/`);
   }
+
+  async eliminarLista(id: number): Promise<void> {
+    await axiosClient.delete(`/kache/listas-comparacion/${id}/`);
+  }
 }

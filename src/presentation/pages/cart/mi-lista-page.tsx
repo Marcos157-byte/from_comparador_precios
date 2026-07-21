@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Scale, X } from 'lucide-react';
-import type { ItemComparacion, TotalPorComercio } from '@/domain/entities/lista-comparacion.entity';
+import { Plus, Scale, Trash2, X } from 'lucide-react';
+import type {
+  ItemComparacion,
+  ListaComparacionResumen,
+  TotalPorComercio,
+} from '@/domain/entities/lista-comparacion.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
 import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { tieneDelivery, urlDelivery, urlMaps } from '@/domain/services/comercio-links.service';
@@ -24,8 +28,11 @@ export function MiListaPage() {
   const setListaActiva = useComparadorStore((s) => s.setListaActiva);
   const crearLista = useComparadorStore((s) => s.crearLista);
   const quitarItem = useComparadorStore((s) => s.quitarItem);
+  const eliminarLista = useComparadorStore((s) => s.eliminarLista);
 
   const [mostrarNuevaLista, setMostrarNuevaLista] = useState(false);
+  const [listaAEliminar, setListaAEliminar] = useState<ListaComparacionResumen | null>(null);
+  const [eliminando, setEliminando] = useState(false);
 
   useEffect(() => {
     cargarListaActiva();
@@ -49,19 +56,32 @@ export function MiListaPage() {
 
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {listas.map((lista) => (
-              <button
+              <div
                 key={lista.id}
-                type="button"
-                onClick={() => setListaActiva(lista.id)}
                 className={cn(
-                  'shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold',
+                  'flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full py-1 pl-4 pr-1.5 text-sm font-bold',
                   lista.id === listaActivaId
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground',
                 )}
               >
-                {lista.nombre}
-              </button>
+                <button type="button" onClick={() => setListaActiva(lista.id)} className="py-1">
+                  {lista.nombre}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setListaAEliminar(lista)}
+                  aria-label={`Eliminar lista "${lista.nombre}"`}
+                  className={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded-full',
+                    lista.id === listaActivaId
+                      ? 'text-primary-foreground/70 hover:text-primary-foreground'
+                      : 'text-muted-foreground/60 hover:text-destructive',
+                  )}
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
             ))}
             <button
               type="button"
@@ -120,6 +140,20 @@ export function MiListaPage() {
           }}
         />
       )}
+
+      {listaAEliminar && (
+        <EliminarListaDialog
+          lista={listaAEliminar}
+          eliminando={eliminando}
+          onCancelar={() => setListaAEliminar(null)}
+          onConfirmar={async () => {
+            setEliminando(true);
+            await eliminarLista(listaAEliminar.id);
+            setEliminando(false);
+            setListaAEliminar(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -167,6 +201,50 @@ function NuevaListaDialog({
             className="px-2 py-1 text-sm font-semibold text-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Crear
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EliminarListaDialog({
+  lista,
+  eliminando,
+  onCancelar,
+  onConfirmar,
+}: {
+  lista: ListaComparacionResumen;
+  eliminando: boolean;
+  onCancelar: () => void;
+  onConfirmar: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6" onClick={onCancelar}>
+      <div
+        className="w-full max-w-sm rounded-[20px] border border-border bg-card p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-base font-bold text-foreground">Eliminar lista</p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          ¿Seguro que quieres eliminar "{lista.nombre}"? Esta acción no se puede deshacer.
+        </p>
+        <div className="mt-5 flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={onCancelar}
+            disabled={eliminando}
+            className="px-2 py-1 text-sm font-semibold text-muted-foreground disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={onConfirmar}
+            disabled={eliminando}
+            className="px-2 py-1 text-sm font-semibold text-destructive disabled:opacity-50"
+          >
+            Eliminar
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { CargarListaActivaUseCase } from '@/application/use-cases/cargar-lista-a
 import { ListarListasUseCase } from '@/application/use-cases/listar-listas.use-case';
 import { ObtenerListaUseCase } from '@/application/use-cases/obtener-lista.use-case';
 import { CrearListaUseCase } from '@/application/use-cases/crear-lista.use-case';
+import { EliminarListaUseCase } from '@/application/use-cases/eliminar-lista.use-case';
 
 const comparadorRepository = new ComparadorHttpAdapter();
 const asegurarListaActivaUseCase = new AsegurarListaActivaUseCase(comparadorRepository);
@@ -18,4 +19,5 @@ export const comparadorUseCases = {
   listarListas: new ListarListasUseCase(comparadorRepository),
   obtenerLista: new ObtenerListaUseCase(comparadorRepository),
   crearLista: new CrearListaUseCase(comparadorRepository),
+  eliminarLista: new EliminarListaUseCase(comparadorRepository),
 };

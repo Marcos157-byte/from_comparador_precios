@@ -30,6 +30,7 @@ interface ComparadorStore {
   agregarProducto: (idProducto: number, idComercio: number) => Promise<void>;
   agregarProductoAListaElegida: (idProducto: number, idComercio: number, idLista: number) => Promise<void>;
   quitarItem: (idItem: number) => Promise<void>;
+  eliminarLista: (id: number) => Promise<void>;
 }
 
 export const useComparadorStore = create<ComparadorStore>((set, get) => ({
@@ -161,6 +162,34 @@ export const useComparadorStore = create<ComparadorStore>((set, get) => ({
       set({ detalle });
     } catch {
       // Igual que en Flutter: fallo silencioso, la lista simplemente no se refresca.
+    }
+  },
+
+  eliminarLista: async (id) => {
+    set({ cargando: true, error: null });
+    try {
+      await comparadorUseCases.eliminarLista.execute(id);
+      const listasRestantes = get().listas.filter((l) => l.id !== id);
+      const eraActiva = get().listaActivaId === id;
+
+      if (!eraActiva) {
+        set({ listas: listasRestantes, cargando: false });
+        return;
+      }
+
+      if (listasRestantes.length === 0) {
+        // Mismo estado "sin listas" que ve un usuario que nunca creó ninguna.
+        localStorage.removeItem(KEY_LISTA_ACTIVA);
+        set({ listas: listasRestantes, listaActivaId: null, detalle: null, cargando: false });
+        return;
+      }
+
+      const siguienteId = listasRestantes[0].id;
+      const detalle = await comparadorUseCases.obtenerLista.execute(siguienteId);
+      guardarListaActiva(siguienteId);
+      set({ listas: listasRestantes, listaActivaId: siguienteId, detalle, cargando: false });
+    } catch {
+      set({ cargando: false, error: 'No se pudo eliminar la lista.' });
     }
   },
 }));
