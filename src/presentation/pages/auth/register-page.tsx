@@ -8,6 +8,7 @@ import { Input } from '@/presentation/components/ui/input';
 import { Label } from '@/presentation/components/ui/label';
 import { Button } from '@/presentation/components/ui/button';
 import { GoogleLoginButton } from '@/presentation/components/google-login-button';
+import { AuthHeroPanel } from '@/presentation/components/auth-hero-panel';
 
 interface FormErrors {
   username?: string;
@@ -50,7 +51,7 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-full flex-col bg-background">
-      <div className="flex h-14 items-center gap-2 border-b border-border bg-card px-2">
+      <div className="flex h-14 items-center gap-2 border-b border-border bg-card px-2 lg:px-8">
         <button
           type="button"
           onClick={() => navigate('/login')}
@@ -61,104 +62,113 @@ export function RegisterPage() {
         <h1 className="text-lg font-bold">Crear cuenta</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-sm flex-col p-6">
-        {mensajeError && (
-          <div className="mb-4 rounded-xl border border-destructive bg-destructive/12 p-3 text-sm text-destructive">
-            {mensajeError}
-          </div>
-        )}
+      <div className="flex flex-1 flex-col lg:flex-row">
+        <AuthHeroPanel
+          titulo="Únete y empieza a ahorrar"
+          subtitulo="Creá tu cuenta gratis y compará precios reales entre los principales comercios de Ecuador."
+        />
 
-        <div>
-          <Label htmlFor="username">Usuario</Label>
-          <div className="relative mt-1.5">
-            <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="username"
-              className="pl-9"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          {errors.username && <p className="mt-1 text-xs text-destructive">{errors.username}</p>}
+        <div className="flex flex-1 items-center justify-center">
+          <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-sm flex-col p-6">
+            {mensajeError && (
+              <div className="mb-4 rounded-xl border border-destructive bg-destructive/12 p-3 text-sm text-destructive">
+                {mensajeError}
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="username">Usuario</Label>
+              <div className="relative mt-1.5">
+                <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="username"
+                  className="pl-9"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </div>
+              {errors.username && <p className="mt-1 text-xs text-destructive">{errors.username}</p>}
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="email">Correo</Label>
+              <div className="relative mt-1.5">
+                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  className="pl-9"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative mt-1.5">
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={obscurePassword ? 'password' : 'text'}
+                  className="px-9"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setObscurePassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {obscurePassword ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="password2">Confirmar contraseña</Label>
+              <div className="relative mt-1.5">
+                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password2"
+                  type={obscurePassword2 ? 'password' : 'text'}
+                  className="px-9"
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setObscurePassword2((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {obscurePassword2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                </button>
+              </div>
+              {errors.password2 && <p className="mt-1 text-xs text-destructive">{errors.password2}</p>}
+            </div>
+
+            <Button type="submit" disabled={isLoading} className="mt-6 h-[52px] rounded-xl text-[15px]">
+              {isLoading ? (
+                <span className="size-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+              ) : (
+                'Crear cuenta'
+              )}
+            </Button>
+
+            <div className="mt-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">o continúa con</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className="mt-4">
+              <GoogleLoginButton onError={setGoogleError} />
+            </div>
+          </form>
         </div>
-
-        <div className="mt-4">
-          <Label htmlFor="email">Correo</Label>
-          <div className="relative mt-1.5">
-            <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="email"
-              type="email"
-              className="pl-9"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
-        </div>
-
-        <div className="mt-4">
-          <Label htmlFor="password">Contraseña</Label>
-          <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="password"
-              type={obscurePassword ? 'password' : 'text'}
-              className="px-9"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => setObscurePassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            >
-              {obscurePassword ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-            </button>
-          </div>
-          {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
-        </div>
-
-        <div className="mt-4">
-          <Label htmlFor="password2">Confirmar contraseña</Label>
-          <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="password2"
-              type={obscurePassword2 ? 'password' : 'text'}
-              className="px-9"
-              value={password2}
-              onChange={(e) => setPassword2(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => setObscurePassword2((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            >
-              {obscurePassword2 ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-            </button>
-          </div>
-          {errors.password2 && <p className="mt-1 text-xs text-destructive">{errors.password2}</p>}
-        </div>
-
-        <Button type="submit" disabled={isLoading} className="mt-6 h-[52px] rounded-xl text-[15px]">
-          {isLoading ? (
-            <span className="size-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-          ) : (
-            'Crear cuenta'
-          )}
-        </Button>
-
-        <div className="mt-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs font-medium text-muted-foreground">o continúa con</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        <div className="mt-4">
-          <GoogleLoginButton onError={setGoogleError} />
-        </div>
-      </form>
+      </div>
     </div>
   );
 }

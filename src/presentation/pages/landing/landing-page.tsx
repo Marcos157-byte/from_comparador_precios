@@ -2,31 +2,20 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PiggyBank, Scale, Search } from 'lucide-react';
 import type { ComercioLigero } from '@/domain/entities/comercio-ligero.entity';
-import type { Precio } from '@/domain/entities/precio.entity';
 import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
 import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
+import { NAVY, NAVY_DEEP, MINT, MINT_TEXTO } from '@/presentation/theme/brand.theme';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
+import { TarjetaPrecioDestacado } from '@/presentation/components/tarjeta-precio-destacado';
 import { productoUseCases } from '@/infrastructure/factories/producto.factory';
 import { comercioUseCases } from '@/infrastructure/factories/comercio.factory';
-import { precioUseCases } from '@/infrastructure/factories/precio.factory';
 import { cn } from '@/presentation/utils/cn';
-
-const NAVY = '#12185C';
-const NAVY_DEEP = '#050726';
-const MINT = '#00D9A3';
-const MINT_TEXTO = '#00A37A'; // variante más oscura del mint para texto legible sobre fondos claros
-
-// Producto real confirmado (con curl, antes de construir) con precios vigentes en 2
-// comercios distintos — es el único caso hoy en el catálogo con más de un comercio.
-const ID_PRODUCTO_DESTACADO = 224;
 
 const pasos = [
   { icon: Search, texto: 'Elegí una categoría de Supermercados, Farmacias o Ferreterías.' },
   { icon: Scale, texto: 'Comparás el precio del mismo producto entre distintos comercios.' },
   { icon: PiggyBank, texto: 'Elegís el más barato y armás tu lista de compras. Así de simple.' },
 ];
-
-const formatoPrecio = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
 function useRevealOnScroll<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -61,7 +50,6 @@ export function LandingPage() {
   const navigate = useNavigate();
   const [totalProductos, setTotalProductos] = useState<number | null>(null);
   const [comercios, setComercios] = useState<ComercioLigero[] | null>(null);
-  const [preciosDestacados, setPreciosDestacados] = useState<Precio[] | null>(null);
 
   useEffect(() => {
     productoUseCases.listar
@@ -71,10 +59,6 @@ export function LandingPage() {
     comercioUseCases.listar
       .execute()
       .then((r) => setComercios(r))
-      .catch(() => {});
-    precioUseCases.listarPorProducto
-      .execute(ID_PRODUCTO_DESTACADO)
-      .then((r) => setPreciosDestacados(r))
       .catch(() => {});
   }, []);
 
@@ -88,19 +72,6 @@ export function LandingPage() {
   return (
     <div className="relative min-h-full overflow-x-hidden bg-background">
       <style>{`
-        @keyframes landing-price-pulse {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(0, 217, 163, 0.45);
-            border-color: color-mix(in srgb, ${MINT} 55%, transparent);
-          }
-          50% {
-            box-shadow: 0 0 0 9px rgba(0, 217, 163, 0);
-            border-color: ${MINT};
-          }
-        }
-        .landing-price-pulse {
-          animation: landing-price-pulse 2.4s ease-in-out infinite;
-        }
         .landing-reveal {
           opacity: 0;
           transform: translateY(18px);
@@ -111,7 +82,6 @@ export function LandingPage() {
           transform: translateY(0);
         }
         @media (prefers-reduced-motion: reduce) {
-          .landing-price-pulse { animation: none; border-color: ${MINT} !important; }
           .landing-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         }
       `}</style>
@@ -156,7 +126,7 @@ export function LandingPage() {
           </div>
 
           <div className="w-full max-w-sm">
-            <TarjetaPrecioDestacado precios={preciosDestacados} />
+            <TarjetaPrecioDestacado />
           </div>
         </div>
       </div>
@@ -319,61 +289,6 @@ function ComercioChip({ comercio }: { comercio: ComercioLigero }) {
       ) : (
         <span className="text-3xl">{ui.emoji}</span>
       )}
-    </div>
-  );
-}
-
-function TarjetaPrecioDestacado({ precios }: { precios: Precio[] | null }) {
-  if (!precios || precios.length === 0) {
-    return (
-      <div className="flex h-[220px] items-center justify-center rounded-3xl border border-white/10 bg-white/5">
-        <span className="size-7 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
-      </div>
-    );
-  }
-
-  const producto = precios[0].productoDetalle;
-  const idMasBarato = precios[0].id;
-
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white p-5 shadow-[0_24px_70px_rgba(0,0,0,0.4)]">
-      <p className="line-clamp-2 text-[15px] font-bold text-foreground">{producto?.nombre ?? 'Producto'}</p>
-      {producto?.marca && <p className="text-xs text-muted-foreground">{producto.marca}</p>}
-
-      <div className="mt-4 flex flex-col gap-2.5">
-        {precios.map((precio) => {
-          const esElMasBarato = precio.id === idMasBarato;
-          const comercio = precio.comercioDetalle;
-          const tipo = tipoComercioFromValue(comercio?.tipo ?? '');
-          const ui = tipoComercioUi[tipo];
-          const colorBase = comercio ? comercioBrandColor(comercio.nombre, ui.color) : ui.color;
-
-          return (
-            <div
-              key={precio.id}
-              className={cn('flex items-center justify-between rounded-2xl border p-3', esElMasBarato && 'landing-price-pulse')}
-              style={{
-                borderColor: esElMasBarato ? undefined : 'var(--border)',
-                backgroundColor: esElMasBarato ? 'color-mix(in srgb, #00D9A3 10%, white)' : undefined,
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-base">{ui.emoji}</span>
-                <span className="text-sm font-semibold" style={{ color: colorBase }}>
-                  {comercio?.nombre ?? 'Comercio'}
-                </span>
-              </div>
-              <span className="text-lg font-bold" style={{ color: esElMasBarato ? MINT_TEXTO : NAVY }}>
-                {formatoPrecio.format(precio.precioEfectivo)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="mt-3 text-center text-[11px] font-semibold" style={{ color: MINT_TEXTO }}>
-        ✓ Encontramos el más barato para vos
-      </p>
     </div>
   );
 }

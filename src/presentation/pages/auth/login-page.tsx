@@ -8,6 +8,8 @@ import { Input } from '@/presentation/components/ui/input';
 import { Label } from '@/presentation/components/ui/label';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
 import { GoogleLoginButton } from '@/presentation/components/google-login-button';
+import { AuthHeroPanel } from '@/presentation/components/auth-hero-panel';
+import { cn } from '@/presentation/utils/cn';
 
 const NAVY = '#1A237E';
 
@@ -35,88 +37,101 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-background p-6">
-      <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col">
-        <TiraRombosCentrada className="mx-auto h-[30px] w-[200px]" />
+    <div className="flex min-h-full flex-col lg:flex-row">
+      <AuthHeroPanel
+        titulo="Bienvenido de nuevo"
+        subtitulo="Iniciá sesión para seguir comparando precios y ahorrando en cada compra."
+      />
 
-        <h1 className="mt-2 text-center text-3xl font-bold" style={{ color: NAVY }}>
-          PreciosEC
-        </h1>
-        <p className="mt-2 text-center text-sm text-blue-600">COMPARA precios entre comercios</p>
-
-        {mensajeError && (
-          <div className="mt-10 rounded-xl border border-destructive bg-destructive/12 p-3 text-sm text-destructive">
-            {mensajeError}
+      <div className="flex flex-1 items-center justify-center bg-background p-6">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col">
+          <div className="lg:hidden">
+            <TiraRombosCentrada className="mx-auto h-[30px] w-[200px]" />
+            <h1 className="mt-2 text-center text-3xl font-bold" style={{ color: NAVY }}>
+              PreciosEC
+            </h1>
+            <p className="mt-2 text-center text-sm text-blue-600">COMPARA precios entre comercios</p>
           </div>
-        )}
 
-        <div className={mensajeError ? 'mt-4' : 'mt-10'}>
-          <Label htmlFor="username">Usuario</Label>
-          <div className="relative mt-1.5">
-            <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="username"
-              className="pl-9"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          {errors.username && <p className="mt-1 text-xs text-destructive">{errors.username}</p>}
-        </div>
-
-        <div className="mt-4">
-          <Label htmlFor="password">Contraseña</Label>
-          <div className="relative mt-1.5">
-            <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="password"
-              type={obscurePassword ? 'password' : 'text'}
-              className="px-9"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => setObscurePassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          {mensajeError && (
+            <div
+              className={cn(
+                'rounded-xl border border-destructive bg-destructive/12 p-3 text-sm text-destructive',
+                'mt-10 lg:mt-0',
+              )}
             >
-              {obscurePassword ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-            </button>
-          </div>
-          {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="mt-6 flex h-[52px] items-center justify-center rounded-xl text-[15px] font-bold text-yellow-400 disabled:opacity-60"
-          style={{ backgroundColor: NAVY }}
-        >
-          {isLoading ? (
-            <span className="size-5 animate-spin rounded-full border-2 border-[#0410FC] border-t-transparent" />
-          ) : (
-            'Iniciar sesión'
+              {mensajeError}
+            </div>
           )}
-        </button>
 
-        <div className="mt-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs font-medium text-muted-foreground">o continúa con</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
+          <div className={cn(mensajeError ? 'mt-4' : 'mt-10', 'lg:mt-0')}>
+            <Label htmlFor="username">Usuario</Label>
+            <div className="relative mt-1.5">
+              <User className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="username"
+                className="pl-9"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            {errors.username && <p className="mt-1 text-xs text-destructive">{errors.username}</p>}
+          </div>
 
-        <div className="mt-4">
-          <GoogleLoginButton onError={setGoogleError} />
-        </div>
+          <div className="mt-4">
+            <Label htmlFor="password">Contraseña</Label>
+            <div className="relative mt-1.5">
+              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="password"
+                type={obscurePassword ? 'password' : 'text'}
+                className="px-9"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setObscurePassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              >
+                {obscurePassword ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+              </button>
+            </div>
+            {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
+          </div>
 
-        <Link
-          to="/register"
-          className="mt-4 text-center text-sm font-semibold text-red-600"
-          aria-disabled={isLoading}
-        >
-          ¿No tienes cuenta? Regístrate
-        </Link>
-      </form>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="mt-6 flex h-[52px] items-center justify-center rounded-xl text-[15px] font-bold text-yellow-400 disabled:opacity-60"
+            style={{ backgroundColor: NAVY }}
+          >
+            {isLoading ? (
+              <span className="size-5 animate-spin rounded-full border-2 border-[#0410FC] border-t-transparent" />
+            ) : (
+              'Iniciar sesión'
+            )}
+          </button>
+
+          <div className="mt-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs font-medium text-muted-foreground">o continúa con</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="mt-4">
+            <GoogleLoginButton onError={setGoogleError} />
+          </div>
+
+          <Link
+            to="/register"
+            className="mt-4 text-center text-sm font-semibold text-red-600"
+            aria-disabled={isLoading}
+          >
+            ¿No tienes cuenta? Regístrate
+          </Link>
+        </form>
+      </div>
     </div>
   );
 }

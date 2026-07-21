@@ -37,15 +37,15 @@ export function MiListaPage() {
     <div className="relative min-h-full bg-background">
       <FondoPatron />
 
-      <div className="relative overflow-hidden rounded-b-[28px] bg-white px-5 pt-14 shadow-[0_3px_10px_rgba(0,0,0,0.06)]">
-        <div className="absolute left-0 top-2.5">
+      <div className="relative overflow-hidden rounded-b-[28px] bg-white px-5 pt-14 shadow-[0_3px_10px_rgba(0,0,0,0.06)] lg:rounded-2xl lg:border lg:border-border lg:px-8 lg:pb-8 lg:pt-8 lg:shadow-none">
+        <div className="absolute left-0 top-2.5 lg:hidden">
           <TiraRombosCentrada width={180} height={50} />
         </div>
-        <div className="relative pb-4 pt-2.5">
-          <p className="text-right text-[22px] font-bold" style={{ color: NAVY }}>
+        <div className="relative pb-4 pt-2.5 lg:pb-0 lg:pt-0">
+          <p className="text-right text-[22px] font-bold lg:hidden" style={{ color: NAVY }}>
             PreciosEC
           </p>
-          <p className="mt-2 text-xl font-bold text-[#333333]">Mis listas de compras</p>
+          <p className="mt-2 text-xl font-bold text-[#333333] lg:mt-0 lg:text-2xl">Mis listas de compras</p>
 
           <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
             {listas.map((lista) => (
@@ -86,7 +86,7 @@ export function MiListaPage() {
         </div>
       </div>
 
-      <div className="relative px-4 pb-8 pt-4">
+      <div className="relative px-4 pb-8 pt-4 lg:px-0 lg:pt-6">
         {cargando && !detalle ? (
           <div className="flex justify-center py-20">
             <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -98,7 +98,7 @@ export function MiListaPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-5">
             {detalle.totalesPorComercio.map((total) => (
               <ComercioGrupo
                 key={total.idComercio}

@@ -97,7 +97,7 @@ export function PreciosPage() {
       <FondoPatron />
 
       <div className="relative">
-        <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-3">
+        <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-3 lg:px-0 lg:py-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -110,7 +110,7 @@ export function PreciosPage() {
 
         {producto && (
           <div
-            className="px-4 py-4 text-center"
+            className="px-4 py-4 text-center lg:px-0 lg:py-6"
             style={{ background: `linear-gradient(135deg, ${colorBarato}, ${colorOscuro})` }}
           >
             <p className="line-clamp-2 text-base font-bold text-white">{producto.nombre}</p>
@@ -119,7 +119,7 @@ export function PreciosPage() {
           </div>
         )}
 
-        <div className="px-4 pb-36 pt-4">
+        <div className="px-4 pb-36 pt-4 lg:px-0 lg:pb-24 lg:pt-8">
           {estaCargando && !precios ? (
             <div className="flex justify-center py-20">
               <span className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -134,7 +134,7 @@ export function PreciosPage() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-4">
               {precios.map((precio, index) => (
                 <PrecioCard
                   key={precio.id}
@@ -148,19 +148,21 @@ export function PreciosPage() {
           )}
         </div>
 
-        <div className="fixed inset-x-0 bottom-16 border-t border-border bg-card px-4 py-3">
-          <button
-            type="button"
-            onClick={() => navigate('/mi-lista')}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
-          >
-            <ShoppingCart className="size-4" />
-            Ir a mis listas de compras
-          </button>
+        <div className="fixed inset-x-0 bottom-16 border-t border-border bg-card px-4 py-3 lg:bottom-0">
+          <div className="lg:mx-auto lg:max-w-7xl lg:px-8">
+            <button
+              type="button"
+              onClick={() => navigate('/mi-lista')}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-bold text-primary-foreground"
+            >
+              <ShoppingCart className="size-4" />
+              Ir a mis listas de compras
+            </button>
+          </div>
         </div>
 
         {mensajeToast && (
-          <div className="fixed inset-x-4 bottom-36 z-50 rounded-lg bg-[#323232] px-4 py-3 text-center text-sm text-white shadow-lg">
+          <div className="fixed inset-x-4 bottom-36 z-50 rounded-lg bg-[#323232] px-4 py-3 text-center text-sm text-white shadow-lg lg:inset-x-0 lg:bottom-24 lg:mx-auto lg:max-w-sm">
             {mensajeToast}
           </div>
         )}
