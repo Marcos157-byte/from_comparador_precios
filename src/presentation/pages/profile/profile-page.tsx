@@ -1,11 +1,12 @@
 import { useState, type ComponentType, type ReactNode } from 'react';
-import { User, Bell, HelpCircle, Info, LogOut, ChevronRight } from 'lucide-react';
+import { User, Bell, HelpCircle, Info, LogOut, ChevronRight, Shield } from 'lucide-react';
 import { useAuthStore } from '@/presentation/store/auth.store';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
 import { FondoPatron } from '@/presentation/components/fondo-patron';
 import { cn } from '@/presentation/utils/cn';
 
 const NAVY = '#1A237E';
+const ADMIN_URL = 'https://comparacion-precios-api.uaeftt-ute.site/admin/';
 
 const AYUDA_CONTENIDO =
   '1. Elige una categoría (Supermercados, Farmacias o Ferreterías)\n\n' +
@@ -104,6 +105,18 @@ export function ProfilePage() {
           {opciones.map((op) => (
             <OpcionTile key={op.titulo} opcion={op} onClick={() => setDialogo(op)} />
           ))}
+          {user?.isStaff && (
+            <OpcionTile
+              opcion={{
+                icono: Shield,
+                titulo: 'Panel de administración',
+                subtitulo: 'Gestionar comercios, productos y categorías',
+                color: '#0F766E',
+                contenido: '',
+              }}
+              onClick={() => window.open(ADMIN_URL, '_blank', 'noopener,noreferrer')}
+            />
+          )}
         </div>
 
         <div className="my-5 border-t border-border" />
