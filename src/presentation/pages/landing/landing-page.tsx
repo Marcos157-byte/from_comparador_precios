@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PiggyBank, Scale, Search } from 'lucide-react';
 import type { ComercioLigero } from '@/domain/entities/comercio-ligero.entity';
-import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor, comercioLogoEsBlanco } from '@/presentation/theme/comercio-brand.theme';
 import { NAVY, NAVY_DEEP, MINT, MINT_TEXTO } from '@/presentation/theme/brand.theme';
 import { TiraRombosCentrada } from '@/presentation/components/tira-rombos-centrada';
 import { TarjetaPrecioDestacado } from '@/presentation/components/tarjeta-precio-destacado';
+import { ComercioChip } from '@/presentation/components/comercio-chip';
+import { useRevealOnScroll } from '@/presentation/hooks/use-reveal-on-scroll';
 import { productoUseCases } from '@/infrastructure/factories/producto.factory';
 import { comercioUseCases } from '@/infrastructure/factories/comercio.factory';
 import { cn } from '@/presentation/utils/cn';
@@ -16,35 +16,6 @@ const pasos = [
   { icon: Scale, texto: 'Comparás el precio del mismo producto entre distintos comercios.' },
   { icon: PiggyBank, texto: 'Elegís el más barato y armás tu lista de compras. Así de simple.' },
 ];
-
-function useRevealOnScroll<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -71,21 +42,6 @@ export function LandingPage() {
 
   return (
     <div className="relative min-h-full overflow-x-hidden bg-background">
-      <style>{`
-        .landing-reveal {
-          opacity: 0;
-          transform: translateY(18px);
-          transition: opacity 0.7s ease-out, transform 0.7s ease-out;
-        }
-        .landing-reveal-visible {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .landing-reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-        }
-      `}</style>
-
       {/* a) HERO */}
       <div
         className="relative overflow-hidden px-6 pb-14 pt-14 lg:px-16 lg:pb-20 lg:pt-20"
@@ -135,8 +91,8 @@ export function LandingPage() {
       <div
         ref={statsReveal.ref}
         className={cn(
-          'landing-reveal border-b border-border/70 bg-card/40 px-5 py-5 lg:px-16',
-          statsReveal.visible && 'landing-reveal-visible',
+          'scroll-reveal border-b border-border/70 bg-card/40 px-5 py-5 lg:px-16',
+          statsReveal.visible && 'scroll-reveal-visible',
         )}
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-2 lg:justify-start">
@@ -151,7 +107,7 @@ export function LandingPage() {
       {/* c) CÓMO FUNCIONA */}
       <div
         ref={pasosReveal.ref}
-        className={cn('landing-reveal px-5 pt-10 lg:px-16', pasosReveal.visible && 'landing-reveal-visible')}
+        className={cn('scroll-reveal px-5 pt-10 lg:px-16', pasosReveal.visible && 'scroll-reveal-visible')}
       >
         <div className="mx-auto max-w-7xl">
           <h2 className="font-['Space_Grotesk'] text-xl font-bold text-foreground lg:text-2xl">¿Cómo funciona?</h2>
@@ -190,7 +146,7 @@ export function LandingPage() {
               {comercios.map((comercio, index) => (
                 <div
                   key={comercio.id}
-                  className={cn('landing-reveal', comerciosReveal.visible && 'landing-reveal-visible')}
+                  className={cn('scroll-reveal', comerciosReveal.visible && 'scroll-reveal-visible')}
                   style={{ transitionDelay: `${index * 70}ms` }}
                 >
                   <ComercioChip comercio={comercio} />
@@ -205,8 +161,8 @@ export function LandingPage() {
       <div
         ref={ctaReveal.ref}
         className={cn(
-          'landing-reveal mt-10 px-5 pb-6 pt-8 text-center lg:px-16',
-          ctaReveal.visible && 'landing-reveal-visible',
+          'scroll-reveal mt-10 px-5 pb-6 pt-8 text-center lg:px-16',
+          ctaReveal.visible && 'scroll-reveal-visible',
         )}
         style={{ backgroundColor: 'color-mix(in srgb, #12185C 6%, transparent)' }}
       >
@@ -250,45 +206,5 @@ function StatInline({ valor, etiqueta }: { valor: string; etiqueta: string }) {
       </span>{' '}
       {etiqueta}
     </span>
-  );
-}
-
-function ComercioChip({ comercio }: { comercio: ComercioLigero }) {
-  const [logoFallo, setLogoFallo] = useState(false);
-  const tipo = tipoComercioFromValue(comercio.tipo);
-  const ui = tipoComercioUi[tipo];
-  const colorBase = comercioBrandColor(comercio.nombre, ui.color);
-  const mostrarLogo = Boolean(comercio.logoUrl) && !logoFallo;
-  const placaOscura = comercioLogoEsBlanco(comercio.nombre);
-
-  // Presentación "solo logo": el logo por sí solo identifica al comercio, sin
-  // nombre al lado (fila de logos de clientes). Placa blanca por defecto;
-  // color de marca solo para Coral/Ferrisariato (logo blanco puro).
-  return (
-    <div
-      className={cn(
-        'flex size-20 shrink-0 items-center justify-center rounded-2xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.05)]',
-        mostrarLogo && !placaOscura && 'border border-border bg-white',
-      )}
-      style={
-        mostrarLogo
-          ? placaOscura
-            ? { backgroundColor: colorBase }
-            : undefined
-          : { backgroundColor: `color-mix(in srgb, ${colorBase} 10%, transparent)` }
-      }
-      title={comercio.nombre}
-    >
-      {mostrarLogo ? (
-        <img
-          src={comercio.logoUrl ?? undefined}
-          alt={comercio.nombre}
-          onError={() => setLogoFallo(true)}
-          className="size-full object-contain"
-        />
-      ) : (
-        <span className="text-3xl">{ui.emoji}</span>
-      )}
-    </div>
   );
 }

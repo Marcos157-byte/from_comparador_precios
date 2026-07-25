@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Check } from 'lucide-react';
 import type { Precio } from '@/domain/entities/precio.entity';
-import { tipoComercioFromValue, tipoComercioUi } from '@/presentation/theme/tipo-comercio.theme';
-import { comercioBrandColor } from '@/presentation/theme/comercio-brand.theme';
-import { NAVY, MINT, MINT_TEXTO } from '@/presentation/theme/brand.theme';
+import { NAVY, NAVY_DEEP, MINT } from '@/presentation/theme/brand.theme';
 import { precioUseCases } from '@/infrastructure/factories/precio.factory';
 import { cn } from '@/presentation/utils/cn';
 
@@ -10,6 +9,14 @@ import { cn } from '@/presentation/utils/cn';
 // comercios distintos — es el único caso hoy en el catálogo con más de un comercio.
 const ID_PRODUCTO_DESTACADO = 224;
 const formatoPrecio = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+// Rombos decorativos en las esquinas — mismos colores que TiraRombosCentrada, en un
+// cluster chico en vez de la franja horizontal completa (no entra en este formato).
+const ROMBOS_ESQUINA = [
+  { size: 22, color: '#FFB300' },
+  { size: 16, color: '#1565C0' },
+  { size: 13, color: '#B71C1C' },
+];
 
 // Compartida entre landing-page.tsx y el panel de auth (login/register): hace su
 // propia consulta al backend, así cada pantalla que la usa no duplica el fetch.
@@ -27,20 +34,14 @@ export function TarjetaPrecioDestacado() {
     <>
       <style>{`
         @keyframes tarjeta-precio-pulse {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(0, 217, 163, 0.45);
-            border-color: color-mix(in srgb, ${MINT} 55%, transparent);
-          }
-          50% {
-            box-shadow: 0 0 0 9px rgba(0, 217, 163, 0);
-            border-color: ${MINT};
-          }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(0, 217, 163, 0.5); }
+          50% { box-shadow: 0 0 0 10px rgba(0, 217, 163, 0); }
         }
         .tarjeta-precio-pulse {
           animation: tarjeta-precio-pulse 2.4s ease-in-out infinite;
         }
         @media (prefers-reduced-motion: reduce) {
-          .tarjeta-precio-pulse { animation: none; border-color: ${MINT} !important; }
+          .tarjeta-precio-pulse { animation: none; }
         }
       `}</style>
 
@@ -49,41 +50,75 @@ export function TarjetaPrecioDestacado() {
           <span className="size-7 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
         </div>
       ) : (
-        <div className="rounded-3xl border border-white/10 bg-white p-5 shadow-[0_24px_70px_rgba(0,0,0,0.4)]">
-          <p className="line-clamp-2 text-[15px] font-bold text-foreground">
+        <div
+          className="relative overflow-hidden rounded-3xl p-6 shadow-[0_24px_70px_rgba(0,0,0,0.4)]"
+          style={{ background: `linear-gradient(155deg, ${NAVY} 0%, ${NAVY_DEEP} 100%)` }}
+        >
+          <div className="absolute left-4 top-4 flex items-center gap-1.5" aria-hidden="true">
+            {ROMBOS_ESQUINA.map((r, i) => (
+              <span
+                key={i}
+                className="block shrink-0 rounded-[3px]"
+                style={{
+                  width: r.size,
+                  height: r.size,
+                  backgroundColor: r.color,
+                  transform: `rotate(45deg) translateY(${i % 2 === 0 ? 0 : 6}px)`,
+                }}
+              />
+            ))}
+          </div>
+          <div className="absolute right-4 top-4 flex items-center gap-1.5" aria-hidden="true">
+            {[...ROMBOS_ESQUINA].reverse().map((r, i) => (
+              <span
+                key={i}
+                className="block shrink-0 rounded-[3px]"
+                style={{
+                  width: r.size,
+                  height: r.size,
+                  backgroundColor: r.color,
+                  transform: `rotate(45deg) translateY(${i % 2 === 0 ? 6 : 0}px)`,
+                }}
+              />
+            ))}
+          </div>
+
+          <p className="relative mt-9 line-clamp-2 text-center text-[15px] font-bold text-white">
             {precios[0].productoDetalle?.nombre ?? 'Producto'}
           </p>
           {precios[0].productoDetalle?.marca && (
-            <p className="text-xs text-muted-foreground">{precios[0].productoDetalle.marca}</p>
+            <p className="relative text-center text-xs text-white/60">{precios[0].productoDetalle.marca}</p>
           )}
 
-          <div className="mt-4 flex flex-col gap-2.5">
+          <div className="relative mt-6 flex items-end justify-center gap-4">
             {precios.map((precio) => {
               const esElMasBarato = precio.id === precios[0].id;
               const comercio = precio.comercioDetalle;
-              const tipo = tipoComercioFromValue(comercio?.tipo ?? '');
-              const ui = tipoComercioUi[tipo];
-              const colorBase = comercio ? comercioBrandColor(comercio.nombre, ui.color) : ui.color;
 
               return (
                 <div
                   key={precio.id}
                   className={cn(
-                    'flex items-center justify-between rounded-2xl border p-3',
+                    'relative flex flex-col items-center gap-1.5 rounded-2xl px-5 py-5',
                     esElMasBarato && 'tarjeta-precio-pulse',
                   )}
-                  style={{
-                    borderColor: esElMasBarato ? undefined : 'var(--border)',
-                    backgroundColor: esElMasBarato ? 'color-mix(in srgb, #00D9A3 10%, white)' : undefined,
-                  }}
+                  style={{ backgroundColor: esElMasBarato ? MINT : 'rgba(255,255,255,0.1)' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{ui.emoji}</span>
-                    <span className="text-sm font-semibold" style={{ color: colorBase }}>
-                      {comercio?.nombre ?? 'Comercio'}
+                  {esElMasBarato && (
+                    <span
+                      className="absolute -right-2 -top-2 flex size-7 items-center justify-center rounded-full"
+                      style={{ backgroundColor: NAVY }}
+                    >
+                      <Check className="size-4" style={{ color: MINT }} />
                     </span>
-                  </div>
-                  <span className="text-lg font-bold" style={{ color: esElMasBarato ? MINT_TEXTO : NAVY }}>
+                  )}
+                  <span className="text-xs font-semibold" style={{ color: esElMasBarato ? NAVY_DEEP : 'rgba(255,255,255,0.75)' }}>
+                    {comercio?.nombre ?? 'Comercio'}
+                  </span>
+                  <span
+                    className="text-2xl font-bold"
+                    style={{ color: esElMasBarato ? NAVY_DEEP : 'rgba(255,255,255,0.85)' }}
+                  >
                     {formatoPrecio.format(precio.precioEfectivo)}
                   </span>
                 </div>
@@ -91,7 +126,8 @@ export function TarjetaPrecioDestacado() {
             })}
           </div>
 
-          <p className="mt-3 text-center text-[11px] font-semibold" style={{ color: MINT_TEXTO }}>
+          <p className="relative mt-6 text-center text-sm font-bold text-white">Mismo producto, distintos precios</p>
+          <p className="relative mt-1 text-center text-xs font-semibold" style={{ color: MINT }}>
             ✓ Encontramos el más barato para vos
           </p>
         </div>
