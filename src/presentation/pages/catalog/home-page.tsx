@@ -47,31 +47,24 @@ interface TilePropuestaValor {
 const TILES_PROPUESTA_VALOR: TilePropuestaValor[] = [
   {
     key: 'etiqueta',
-    src: '/assets/etiqueta-codigo-barras.png',
+    src: '/assets/etiqueta-codigo-barras.jpg',
     alt: 'Etiqueta de precio con código de barras',
     label: 'Cada producto, identificado',
     fondo: 'navy',
   },
   {
-    key: 'manos',
-    src: '/assets/manos-comparando-precios.png',
-    alt: 'Manos comparando dos etiquetas de precio',
-    label: 'Comparás en segundos',
-    fondo: 'mint',
-  },
-  {
     key: 'balanza',
-    src: '/assets/balanza-precios.png',
+    src: '/assets/balanza-precios.jpg',
     alt: 'Balanza comparando dos precios',
     label: 'Elegís el más barato',
-    fondo: 'navy',
+    fondo: 'mint',
   },
   {
     key: 'dolar-euro',
-    src: '/assets/simbolo-dolar-euro.png',
+    src: '/assets/simbolo-dolar-euro.jpg',
     alt: 'Símbolos de moneda',
     label: 'Ahorrás en cada compra',
-    fondo: 'mint',
+    fondo: 'navy',
   },
 ];
 
@@ -209,7 +202,7 @@ export function HomePage() {
           className={cn('scroll-reveal mt-8 lg:mt-10', propuestaReveal.visible && 'scroll-reveal-visible')}
         >
           <h2 className="text-[22px] font-bold text-foreground lg:text-xl">¿Por qué comparar con PreciosEC?</h2>
-          <div className="mt-3.5 grid grid-cols-2 gap-4 lg:max-w-2xl lg:grid-cols-4 lg:gap-6">
+          <div className="mt-3.5 grid grid-cols-3 gap-4 lg:max-w-2xl lg:gap-6">
             {TILES_PROPUESTA_VALOR.map((tile) => (
               <TilePropuestaValorCard key={tile.key} tile={tile} />
             ))}
